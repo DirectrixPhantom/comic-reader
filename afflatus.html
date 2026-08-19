@@ -179,6 +179,21 @@
     transition:opacity .18s,transform .18s;max-width:80%;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @media (prefers-reduced-motion: reduce){ #peek,#track,#knob,#toast,.panel.pending::after,#stage.loading::after{transition:none;animation:none} }
+
+  /* --- mobile --- */
+  @media(max-width:560px){
+    #prevBtn .lab,#nextBtn .lab{display:none}
+    #prevBtn,#nextBtn{padding:0 14px}
+    #countBtn{padding:0 8px}
+    #countTxt{min-width:44px}
+    #scrubZone{min-width:120px}
+  }
+  @media(max-width:520px){ #byline{display:none} }
+  @media(pointer:coarse){
+    #topnav button,#botnav button,.seg button{min-height:44px}
+    .seg button{min-width:44px}
+    #backBtn{min-width:44px}
+  }
 </style>
 </head>
 <body>
@@ -687,7 +702,7 @@ window.CONFIG = { title:"Afflatus", artist:"Snadiya", artistSite:"https://linktr
   paintIcons(document);
   buildScroll();buildChapMenu();buildThumbs();placeTicks();
   var savedPos=rd(K_POS,null); if(savedPos&&typeof savedPos.i==="number"){ page=Math.min(TOTAL-1,Math.max(0,savedPos.i)); }
-  var savedMode=rd(K_MODE,"pages"); var s0=savedMode==="pages"?sPages:sScroll;
+  var savedMode=rd(K_MODE,(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||navigator.maxTouchPoints>0?"scroll":"pages"); var s0=savedMode==="pages"?sPages:sScroll;
   fit=s0.fit!==false;tapAdvance=!!s0.tapAdvance;
   document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
   document.getElementById("oTap").setAttribute("aria-pressed",String(tapAdvance));
