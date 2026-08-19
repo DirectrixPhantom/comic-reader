@@ -1,0 +1,109 @@
+<title>Comics — Snadiya</title>
+<style>
+  :root{
+    --bg:#1e1b2c;
+    --surface:#393047;
+    --surface-2:#5a356a;
+    --sep:rgba(236,193,194,.42);
+    --text:#ecc1c2;
+    --text-2:#cda6b5;
+    --amber:#f49c58;
+    --amber-dk:#1e1b2c;
+    --tint:#f49c58; --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184; --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
+           "Segoe UI Variable Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);
+    font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 72px}
+
+  header{padding:34px 4px 20px;border-bottom:1px solid var(--sep);margin-bottom:6px;
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:30px;font-weight:700;letter-spacing:-.03em;margin:0}
+  header .by{font-size:17px;color:var(--text-2)}
+  header .by a{color:var(--amber);text-decoration:none}
+  header .by a:hover{text-decoration:underline}
+  header .count{margin-left:auto;font-size:16px;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  ul.list{list-style:none;margin:0;padding:0}
+  li.comic{margin:0}
+  a.row{display:flex;align-items:center;gap:16px;padding:14px 6px;text-decoration:none;color:inherit;
+    border-bottom:1px solid var(--sep)}
+  a.row:hover{background:var(--surface)}
+  a.row:focus-visible{outline:2px solid var(--tint);outline-offset:-2px}
+
+  .cover{flex:none;width:68px;height:68px;border:1px solid var(--sep);background:var(--surface-2);
+    overflow:hidden;position:relative}
+  .cover img{display:block;width:100%;height:100%;object-fit:cover}
+  .cover.empty{display:flex;align-items:center;justify-content:center}
+  .cover.empty span{font-size:26px;font-weight:700;color:var(--text-2);letter-spacing:-.02em}
+
+  .meta{flex:1;min-width:0}
+  .meta .t{font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+  .meta .n{font-size:16px;color:var(--text-2);font-variant-numeric:tabular-nums;margin-top:2px}
+
+  .chev{flex:none;color:var(--text-2);display:flex}
+  .chev svg{width:22px;height:22px}
+  a.row:hover .chev{color:var(--tint)}
+
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Comics</h1>
+    <span class="by">by <a href="https://linktr.ee/snadiya">Snadiya</a></span>
+    <span class="count" id="count"></span>
+  </header>
+
+  <ul class="list" id="list"></ul>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var COMICS = [
+  {"t":"BoundBorne","u":"boundborne.html","n":149,"img":"prologue/p01.jpg"},
+  {"t":"Disgusting Requests","u":"disgust.html","n":79,"img":"disgust/panel_001.jpg"},
+  {"t":"Corridor","u":"corridor.html","n":67,"img":"corridor/panel_001.jpg"},
+  {"t":"PanTied","u":"pantied.html","n":52,"img":"gdrive/panel_000.jpg"},{"t":"Dovah","u":"dovah.html","n":44,"img":"dovah/p1_000.jpg"},
+  {"t":"Mummy Pack 01","u":"pack1.html","n":38,"img":"pack1/panel_001.jpg"},
+  {"t":"PT: Packaged Traveler","u":"traveler.html","n":38,"img":"g4/panel_001.jpg"},
+  {"t":"Program","u":"program.html","n":18,"img":"g3/panel_001.jpg"},
+  {"t":"BoundBorne Bonus Pack","u":"pack01.html","n":11,"img":"pack01/00.jpg"}
+];
+  // On the live site, thumbnails load from these paths; the "d" data URI is only
+  // for the standalone preview. Prefer the live path when present.
+  var LIVE = "https://mira-96.nekoweb.org/";
+
+  var chev='<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var list=document.getElementById("list");
+  COMICS.forEach(function(c){
+    var li=document.createElement("li");li.className="comic";
+    var a=document.createElement("a");a.className="row";a.href=c.u;
+
+    var cover=document.createElement("div");cover.className="cover";
+    if(c.d){
+      var im=document.createElement("img");im.src=c.d;im.alt="";im.loading="lazy";cover.appendChild(im);
+    } else if(c.img){
+      var im2=document.createElement("img");im2.src=LIVE+c.img;im2.alt="";im2.loading="lazy";cover.appendChild(im2);
+    } else {
+      cover.className="cover empty";
+      var s=document.createElement("span");s.textContent=c.t.charAt(0);cover.appendChild(s);
+    }
+    a.appendChild(cover);
+
+    var meta=document.createElement("div");meta.className="meta";
+    var t=document.createElement("div");t.className="t";t.textContent=c.t;
+    var n=document.createElement("div");n.className="n";n.textContent=c.n+" pages";
+    meta.appendChild(t);meta.appendChild(n);a.appendChild(meta);
+
+    var ch=document.createElement("div");ch.className="chev";ch.innerHTML=chev;a.appendChild(ch);
+
+    li.appendChild(a);list.appendChild(li);
+  });
+  document.getElementById("count").textContent=COMICS.length+" comics";
+})();
+</script>

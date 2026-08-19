@@ -1,0 +1,20 @@
+# --- media never belongs in this repo ---
+# Panels/renders are served from Nekoweb; git handles binaries badly and every
+# re-encode would be stored forever.
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.avi
+*.mkv
+*.webm
+*.rar
+*.zip
+*.7z
+*.blend
+
+# scratch
+_repo/
+*.bak

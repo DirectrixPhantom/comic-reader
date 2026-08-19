@@ -1,0 +1,616 @@
+<title>Collator — a pgData builder for Rarebit</title>
+<style>
+  :root{
+    --paper:#F7F5F0;
+    --ink:#1B1A18;
+    --ink-2:#5A574F;
+    --rule:#D8D3C7;
+    --card:#FFFFFF;
+    --reg:#D8452F;          /* registration-mark red */
+    --reg-soft:#FBE9E5;
+    --cyan:#2B6E8F;
+    --ok:#3F7A4B;
+    --warn:#B07A16;
+    --mono: ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#16151A; --ink:#EDEAE3; --ink-2:#A5A198; --rule:#2E2C33;
+      --card:#1E1D23; --reg:#FF6A50; --reg-soft:#2E1A16;
+      --cyan:#6FB3D2; --ok:#6FBF7F; --warn:#D6A339;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#16151A; --ink:#EDEAE3; --ink-2:#A5A198; --rule:#2E2C33;
+    --card:#1E1D23; --reg:#FF6A50; --reg-soft:#2E1A16;
+    --cyan:#6FB3D2; --ok:#6FBF7F; --warn:#D6A339;
+  }
+  :root[data-theme="light"]{
+    --paper:#F7F5F0; --ink:#1B1A18; --ink-2:#5A574F; --rule:#D8D3C7;
+    --card:#FFFFFF; --reg:#D8452F; --reg-soft:#FBE9E5;
+    --cyan:#2B6E8F; --ok:#3F7A4B; --warn:#B07A16;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 22px 90px}
+
+  /* ---- masthead ---- */
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:28px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--reg);margin:0 0 10px}
+  h1{font-size:clamp(30px,5vw,44px);line-height:1.02;letter-spacing:-.03em;font-weight:800;margin:0 0 10px}
+  h1 em{font-style:normal;color:var(--reg)}
+  header p{margin:0;color:var(--ink-2);max-width:62ch;font-size:17px}
+  header code{font-family:var(--mono);font-size:14px;background:var(--reg-soft);color:var(--ink);padding:1px 5px;border-radius:2px}
+
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-2);margin:0 0 12px;font-weight:600}
+  .step{display:flex;align-items:baseline;gap:10px}
+  .step .no{font-family:var(--mono);font-size:13px;color:var(--reg);font-weight:700}
+
+  section{margin:0 0 34px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:20px}
+
+  /* ---- drop zone ---- */
+  #drop{border:2px dashed var(--rule);border-radius:4px;padding:38px 20px;text-align:center;
+    background:var(--card);transition:border-color .15s,background .15s;cursor:pointer}
+  #drop.over{border-color:var(--reg);background:var(--reg-soft)}
+  #drop strong{display:block;font-size:19px;margin-bottom:6px}
+  #drop span{color:var(--ink-2);font-size:15px}
+  #drop .or{display:block;margin-top:14px;font-size:14px;color:var(--ink-2)}
+  input[type=file]{display:none}
+
+  .btn{font-family:var(--sans);font-size:15px;font-weight:600;padding:10px 16px;
+    border:1px solid var(--ink);background:transparent;color:var(--ink);
+    border-radius:3px;cursor:pointer;min-height:44px}
+  .btn:hover{background:var(--ink);color:var(--paper)}
+  .btn:focus-visible{outline:2px solid var(--reg);outline-offset:2px}
+  .btn.acc{background:var(--reg);border-color:var(--reg);color:#fff}
+  .btn.acc:hover{filter:brightness(1.08)}
+  .btn.sm{font-size:14px;padding:7px 12px;min-height:38px}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn:disabled:hover{background:transparent;color:var(--ink)}
+
+  /* ---- settings grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+  label{display:block;font-size:13px;font-family:var(--mono);letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;font-family:var(--mono);font-size:15px;padding:9px 11px;min-height:44px;
+    background:var(--paper);border:1px solid var(--rule);border-radius:3px;color:var(--ink)}
+  textarea{min-height:76px;resize:vertical;line-height:1.5}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--reg);outline-offset:1px;border-color:var(--reg)}
+  .hint{font-size:13px;color:var(--ink-2);margin:6px 0 0}
+
+  /* ---- pages ---- */
+  .pagelist{display:flex;flex-direction:column;gap:12px}
+  .page{display:grid;grid-template-columns:78px 1fr;gap:16px;
+    background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px}
+  .page.gap{border-color:var(--warn);background:linear-gradient(0deg,var(--card),var(--card))}
+  .thumb{position:relative;border:1px solid var(--rule);border-radius:2px;overflow:hidden;
+    background:var(--paper);aspect-ratio:3/4;display:grid;place-items:center}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .ph{font-family:var(--mono);font-size:11px;color:var(--ink-2);text-align:center;padding:4px}
+  .pgnum{font-family:var(--mono);font-size:12px;color:var(--reg);font-weight:700;margin-bottom:4px}
+  .files{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin:0 0 10px;word-break:break-all}
+  .files b{color:var(--ink);font-weight:600}
+  .fields{display:grid;grid-template-columns:1fr 168px;gap:10px}
+  .fields .full{grid-column:1/-1}
+  @media(max-width:620px){.fields{grid-template-columns:1fr}.page{grid-template-columns:60px 1fr}}
+
+  .flag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;padding:2px 7px;border-radius:2px;vertical-align:middle}
+  .flag.multi{background:var(--cyan);color:#fff}
+  .flag.miss{background:var(--warn);color:#fff}
+
+  /* ---- output ---- */
+  .outbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+  .outbar .spacer{flex:1}
+  pre{margin:0;background:var(--card);border:1px solid var(--rule);border-radius:4px;
+    padding:16px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.6;
+    max-height:460px;overflow-y:auto;color:var(--ink)}
+  .note{border-left:3px solid var(--reg);background:var(--reg-soft);padding:13px 16px;
+    font-size:15px;color:var(--ink-2);border-radius:0 3px 3px 0}
+  .note b{color:var(--ink)}
+  .warnbox{border-left:3px solid var(--warn);background:transparent;border-top:1px solid var(--rule);
+    border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    padding:13px 16px;font-size:15px;border-radius:0 3px 3px 0;margin-bottom:14px}
+  .warnbox b{color:var(--warn)}
+
+  .empty{color:var(--ink-2);font-size:15px;padding:26px;text-align:center;
+    border:1px dashed var(--rule);border-radius:4px}
+
+  footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:18px;
+    font-size:14px;color:var(--ink-2)}
+  footer a{color:var(--cyan)}
+  footer p{margin:0 0 8px;max-width:70ch}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="kicker">a side project · works offline · nothing uploaded</p>
+    <h1>Collator <em>/</em> a pgData builder for Rarebit</h1>
+    <p>Rarebit keeps every page's title, date, alt text and author notes in one hand-written <code>pgData</code> array, and makes you bump <code>maxpg</code> by hand each time you post. Miss it and your newest page never shows. Drop your comic folder here and it writes both for you.</p>
+  </header>
+
+  <section>
+    <h2 class="step"><span class="no">01</span> Point it at your pages</h2>
+    <div id="drop" tabindex="0" role="button" aria-label="Choose your comic images">
+      <strong>Drop your comics folder here</strong>
+      <span>or a pile of page files — <code>pg1.jpg</code>, <code>pg2_1.jpg</code>, <code>pg2_2.jpg</code>…</span>
+      <span class="or">
+        <button class="btn sm" id="pickFiles" type="button">Choose files</button>
+        <button class="btn sm" id="pickDir" type="button">Choose a folder</button>
+      </span>
+    </div>
+    <input type="file" id="fileIn" multiple accept="image/*">
+    <input type="file" id="dirIn" multiple webkitdirectory directory>
+    <p class="hint">Filenames are read in your browser. No image ever leaves this page.</p>
+  </section>
+
+  <section>
+    <h2 class="step"><span class="no">02</span> Match your Rarebit settings</h2>
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="sFolder">folder</label>
+          <input type="text" id="sFolder" value="img/comics">
+        </div>
+        <div>
+          <label for="sImage">image prefix</label>
+          <input type="text" id="sImage" value="pg">
+        </div>
+        <div>
+          <label for="sPart">imgPart</label>
+          <input type="text" id="sPart" value="_">
+        </div>
+        <div>
+          <label for="sExt">ext</label>
+          <input type="text" id="sExt" value="jpg">
+        </div>
+      </div>
+      <p class="hint">These mirror the constants at the top of <code>comic_settings.js</code>. They only affect how filenames are parsed and what the output says.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="step"><span class="no">03</span> Fill the dates in one go</h2>
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="dStart">first page posted</label>
+          <input type="date" id="dStart">
+        </div>
+        <div>
+          <label for="dEvery">then every</label>
+          <select id="dEvery">
+            <option value="0">— leave blank —</option>
+            <option value="1">day</option>
+            <option value="7" selected>week</option>
+            <option value="14">fortnight</option>
+            <option value="30">month-ish (30d)</option>
+          </select>
+        </div>
+        <div>
+          <label for="dTitle">title pattern</label>
+          <input type="text" id="dTitle" placeholder="leave empty for &quot;Page X&quot;">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn" id="applyDates" type="button">Apply to all pages</button>
+        </div>
+      </div>
+      <p class="hint">Rarebit writes dates as <code>writeDate(year, month, day)</code>. Use <code>#</code> in the title pattern for the page number — <code>Chapter 1, #</code> becomes <code>Chapter 1, 4</code>.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="step"><span class="no">04</span> Check the pages</h2>
+    <div id="warnings"></div>
+    <div class="pagelist" id="pages">
+      <div class="empty">No pages yet. Drop some files above.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="step"><span class="no">05</span> Paste this into comic_settings.js</h2>
+    <div class="outbar">
+      <button class="btn acc" id="copyOut" type="button" disabled>Copy to clipboard</button>
+      <button class="btn" id="dlOut" type="button" disabled>Download .js</button>
+      <span class="spacer"></span>
+      <span class="hint" id="outStat">nothing yet</span>
+    </div>
+    <pre id="out">// drop your pages above and this fills in</pre>
+    <p class="note" style="margin-top:14px"><b>Replace</b> the existing <code>const maxpg</code> line and the whole <code>const pgData = [ … ];</code> block. Everything else in <code>comic_settings.js</code> stays as it is.</p>
+  </section>
+
+  <footer>
+    <p><b>On licensing.</b> This tool writes data in the shape Rarebit expects, but contains none of Rarebit's code — so it carries no licence obligation of its own. Rarebit itself is <b>GPL-3.0</b>; building a site on it means your site's code inherits that, and you'd owe visitors the source. Your artwork is unaffected.</p>
+    <p>Rarebit is by Diana Wright — <a href="https://github.com/diana-wright/Rarebit">github.com/diana-wright/Rarebit</a> · <a href="https://rarebit.neocities.org">rarebit.neocities.org</a>. Note the repo moved from its old <code>geno7</code> address, and its <code>package.json</code> still says ISC while the LICENSE file says GPL-3.0 — trust the LICENSE file.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var pages = [];      // {num, files:[{name,url}], title, date, alt, notes}
+  var objectUrls = [];
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function settings(){
+    return {
+      folder: $("sFolder").value.trim() || "img/comics",
+      image:  $("sImage").value.trim()  || "pg",
+      part:   $("sPart").value,
+      ext:    ($("sExt").value.trim() || "jpg").replace(/^\./,"")
+    };
+  }
+
+  /* ---------- filename parsing ----------
+     Rarebit convention: <prefix><n>.<ext> for a single-file page, and
+     <prefix><n><imgPart><k>.<ext> when a page is split across files. */
+  function parseName(name, s){
+    var base = name.replace(/^.*[\\\/]/,"");          // strip any folder path
+    var dot  = base.lastIndexOf(".");
+    var stem = dot > -1 ? base.slice(0,dot) : base;
+    var ext  = dot > -1 ? base.slice(dot+1).toLowerCase() : "";
+
+    if (!/^(jpe?g|png|gif|webp|avif)$/.test(ext)) { return null; }
+
+    var pre = s.image;
+    if (stem.toLowerCase().indexOf(pre.toLowerCase()) !== 0) { return null; }
+    var rest = stem.slice(pre.length);
+
+    var num, sub = 1;
+    if (s.part && rest.indexOf(s.part) > -1){
+      var bits = rest.split(s.part);
+      num = parseInt(bits[0],10);
+      sub = parseInt(bits[1],10);
+      if (isNaN(sub)) { sub = 1; }
+    } else {
+      num = parseInt(rest,10);
+    }
+    if (isNaN(num)) { return null; }
+    return { num:num, sub:sub, name:base, ext:ext };
+  }
+
+  function ingest(fileList){
+    var s = settings();
+    var byNum = {};
+    var skipped = 0;
+
+    Array.prototype.forEach.call(fileList, function(f){
+      var p = parseName(f.webkitRelativePath || f.name, s);
+      if (!p) { skipped++; return; }
+      if (!byNum[p.num]) { byNum[p.num] = []; }
+      var url = URL.createObjectURL(f);
+      objectUrls.push(url);
+      byNum[p.num].push({ name:p.name, sub:p.sub, url:url });
+    });
+
+    // preserve any metadata already typed for a page number
+    var prev = {};
+    pages.forEach(function(pg){ prev[pg.num] = pg; });
+
+    pages = Object.keys(byNum).map(Number).sort(function(a,b){return a-b;}).map(function(n){
+      var files = byNum[n].sort(function(a,b){return a.sub-b.sub;});
+      var old = prev[n];
+      return {
+        num:n, files:files,
+        title: old ? old.title : "",
+        date:  old ? old.date  : "",
+        alt:   old ? old.alt   : "",
+        notes: old ? old.notes : ""
+      };
+    });
+
+    render();
+    if (skipped) {
+      note("Ignored " + skipped + " file" + (skipped===1?"":"s") +
+           " that didn't match “" + s.image + "…." + s.ext + "”.");
+    }
+  }
+
+  var noteTimer;
+  function note(msg){
+    var el = $("outStat");
+    el.textContent = msg;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(function(){ updateStat(); }, 4000);
+  }
+  function updateStat(){
+    $("outStat").textContent = pages.length
+      ? pages.length + " page" + (pages.length===1?"":"s") + " · maxpg = " + maxNum()
+      : "nothing yet";
+  }
+  function maxNum(){
+    return pages.reduce(function(m,p){ return Math.max(m,p.num); }, 0);
+  }
+
+  /* ---------- gaps ---------- */
+  function gaps(){
+    if (!pages.length) { return []; }
+    var have = {}, out = [];
+    pages.forEach(function(p){ have[p.num]=1; });
+    for (var i=1;i<=maxNum();i++){ if(!have[i]){ out.push(i); } }
+    return out;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var host = $("pages");
+    host.textContent = "";
+
+    if (!pages.length){
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = "No pages yet. Drop some files above.";
+      host.appendChild(e);
+      $("warnings").textContent = "";
+      $("copyOut").disabled = true; $("dlOut").disabled = true;
+      $("out").textContent = "// drop your pages above and this fills in";
+      updateStat();
+      return;
+    }
+
+    var g = gaps();
+    var w = $("warnings");
+    w.textContent = "";
+    if (g.length){
+      var wb = document.createElement("div");
+      wb.className = "warnbox";
+      wb.innerHTML = "<b>Missing page numbers:</b> " + g.join(", ") +
+        ". Rarebit counts up to <code>maxpg</code> and will hit a broken image on each gap. " +
+        "Either add the files or renumber so the run is unbroken.";
+      w.appendChild(wb);
+    }
+
+    pages.forEach(function(pg, idx){
+      var row = document.createElement("div");
+      row.className = "page";
+
+      var th = document.createElement("div");
+      th.className = "thumb";
+      if (pg.files[0] && pg.files[0].url){
+        var im = document.createElement("img");
+        im.src = pg.files[0].url; im.alt = "";
+        th.appendChild(im);
+      } else {
+        var ph = document.createElement("span");
+        ph.className = "ph"; ph.textContent = "no file";
+        th.appendChild(ph);
+      }
+      row.appendChild(th);
+
+      var body = document.createElement("div");
+
+      var n = document.createElement("div");
+      n.className = "pgnum";
+      n.textContent = "PAGE " + pg.num;
+      if (pg.files.length > 1){
+        var f = document.createElement("span");
+        f.className = "flag multi";
+        f.textContent = pg.files.length + " files";
+        n.appendChild(document.createTextNode(" "));
+        n.appendChild(f);
+      }
+      body.appendChild(n);
+
+      var fl = document.createElement("p");
+      fl.className = "files";
+      fl.innerHTML = pg.files.map(function(f){ return "<b>"+esc(f.name)+"</b>"; }).join(" · ");
+      body.appendChild(fl);
+
+      var fields = document.createElement("div");
+      fields.className = "fields";
+
+      fields.appendChild(field("Title", "text", pg.title, "Page " + pg.num, function(v){ pg.title=v; emit(); }));
+      fields.appendChild(field("Date", "date", pg.date, "", function(v){ pg.date=v; emit(); }));
+
+      var altWrap = document.createElement("div");
+      altWrap.className = "full";
+      altWrap.appendChild(labelFor("Alt text (mouse-over)"));
+      var alt = document.createElement("input");
+      alt.type = "text"; alt.value = pg.alt; alt.placeholder = "shown on hover — optional";
+      alt.addEventListener("input", function(){ pg.alt = alt.value; emit(); });
+      altWrap.appendChild(alt);
+      fields.appendChild(altWrap);
+
+      var nWrap = document.createElement("div");
+      nWrap.className = "full";
+      nWrap.appendChild(labelFor("Author notes (HTML allowed)"));
+      var ta = document.createElement("textarea");
+      ta.value = pg.notes;
+      ta.placeholder = "<p>Anything you want under the page.</p>";
+      ta.addEventListener("input", function(){ pg.notes = ta.value; emit(); });
+      nWrap.appendChild(ta);
+      fields.appendChild(nWrap);
+
+      body.appendChild(fields);
+      row.appendChild(body);
+      host.appendChild(row);
+    });
+
+    $("copyOut").disabled = false;
+    $("dlOut").disabled = false;
+    emit();
+    updateStat();
+  }
+
+  function labelFor(t){
+    var l = document.createElement("label");
+    l.textContent = t;
+    return l;
+  }
+  function field(labelText, type, value, placeholder, onInput){
+    var d = document.createElement("div");
+    d.appendChild(labelFor(labelText));
+    var i = document.createElement("input");
+    i.type = type; i.value = value || ""; i.placeholder = placeholder || "";
+    i.addEventListener("input", function(){ onInput(i.value); });
+    d.appendChild(i);
+    return d;
+  }
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  // for values going inside a JS double-quoted string
+  function jsStr(s){
+    return String(s||"").replace(/\\/g,"\\\\").replace(/"/g,'\\"')
+                        .replace(/\n/g," ").replace(/\r/g,"");
+  }
+  // for values going inside a template literal
+  function jsTpl(s){
+    return String(s||"").replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$\{/g,"\\${");
+  }
+
+  /* ---------- output ---------- */
+  function emit(){
+    if (!pages.length) { return; }
+    var s = settings();
+    var L = [];
+
+    L.push("// generated by Collator — " + pages.length + " page" + (pages.length===1?"":"s"));
+    L.push("// paste over the matching lines in comic_settings.js");
+    L.push("");
+    L.push("const maxpg = " + maxNum() + ";");
+    L.push("");
+    L.push("const folder = \"" + jsStr(s.folder) + "\";");
+    L.push("const image = \"" + jsStr(s.image) + "\";");
+    L.push("const imgPart = \"" + jsStr(s.part) + "\";");
+    L.push("const ext = \"" + jsStr(s.ext) + "\";");
+    L.push("");
+    L.push("const pgData = [");
+
+    pages.forEach(function(p, i){
+      var d = p.date ? p.date.split("-") : null;
+      var dateLine = d
+        ? "writeDate(" + Number(d[0]) + ", " + Number(d[1]) + ", " + Number(d[2]) + ")"
+        : "writeDate(1970, 1, 1)";
+
+      L.push("    {");
+      L.push("        pgNum: " + p.num + ",");
+      L.push("        title: \"" + jsStr(p.title) + "\",");
+      L.push("        date: " + dateLine + ",");
+      L.push("        altText: \"" + jsStr(p.alt) + "\",");
+      L.push("        imageFiles: " + p.files.length + ",");
+      if (p.notes && p.notes.trim()){
+        L.push("        authorNotes: `");
+        p.notes.split(/\r?\n/).forEach(function(ln){ L.push("            " + jsTpl(ln)); });
+        L.push("            `,");
+      } else {
+        L.push("        authorNotes: ``,");
+      }
+      L.push("    }" + (i === pages.length-1 ? "" : ","));
+    });
+
+    L.push("];");
+
+    var missing = pages.filter(function(p){ return !p.date; }).length;
+    if (missing){
+      L.push("");
+      L.push("// " + missing + " page" + (missing===1?"":"s") +
+             " had no date and fell back to writeDate(1970, 1, 1) — set them in step 03.");
+    }
+
+    $("out").textContent = L.join("\n");
+  }
+
+  /* ---------- bulk dates + titles ---------- */
+  $("applyDates").addEventListener("click", function(){
+    if (!pages.length){ note("Nothing to apply to yet."); return; }
+    var start = $("dStart").value;
+    var every = Number($("dEvery").value);
+    var pat = $("dTitle").value;
+
+    pages.forEach(function(p, i){
+      if (start && every){
+        var d = new Date(start + "T00:00:00");
+        d.setDate(d.getDate() + i*every);
+        p.date = d.getFullYear() + "-" +
+                 String(d.getMonth()+1).padStart(2,"0") + "-" +
+                 String(d.getDate()).padStart(2,"0");
+      } else if (start && !every && i === 0){
+        p.date = start;
+      }
+      if (pat){ p.title = pat.indexOf("#") > -1 ? pat.replace(/#/g, p.num) : pat; }
+    });
+    render();
+    note("Applied to " + pages.length + " pages.");
+  });
+
+  /* ---------- input wiring ---------- */
+  var drop = $("drop");
+  ["dragenter","dragover"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function(e){
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+      ingest(e.dataTransfer.files);
+    }
+  });
+  drop.addEventListener("click", function(e){
+    if (e.target.tagName === "BUTTON") { return; }
+    $("fileIn").click();
+  });
+  drop.addEventListener("keydown", function(e){
+    if (e.key === "Enter" || e.key === " "){ e.preventDefault(); $("fileIn").click(); }
+  });
+  $("pickFiles").addEventListener("click", function(e){ e.stopPropagation(); $("fileIn").click(); });
+  $("pickDir").addEventListener("click", function(e){ e.stopPropagation(); $("dirIn").click(); });
+  $("fileIn").addEventListener("change", function(){ if(this.files.length){ ingest(this.files); } });
+  $("dirIn").addEventListener("change",  function(){ if(this.files.length){ ingest(this.files); } });
+
+  ["sFolder","sImage","sPart","sExt"].forEach(function(id){
+    $(id).addEventListener("input", function(){ emit(); updateStat(); });
+  });
+
+  $("copyOut").addEventListener("click", function(){
+    var txt = $("out").textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(
+        function(){ note("Copied."); },
+        function(){ fallbackCopy(txt); }
+      );
+    } else { fallbackCopy(txt); }
+  });
+  function fallbackCopy(txt){
+    var ta = document.createElement("textarea");
+    ta.value = txt;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); note("Copied."); }
+    catch(e){ note("Couldn't copy — select the text and copy manually."); }
+    document.body.removeChild(ta);
+  }
+
+  $("dlOut").addEventListener("click", function(){
+    var blob = new Blob([$("out").textContent], {type:"text/javascript"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "pgData.js";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    note("Downloaded pgData.js");
+  });
+
+  window.addEventListener("beforeunload", function(){
+    objectUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+  });
+
+  updateStat();
+})();
+</script>

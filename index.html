@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comics</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184;
+    --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
+    --surface:#393047; --text:var(--rose); --text-2:#cda6b5;
+    --sep:rgba(236,193,194,.42);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--text);font-family:var(--font)}
+  .wrap{max-width:940px;margin:0 auto;padding:48px 20px 72px}
+  h1{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--text-2);margin:0 0 34px;font-size:16px}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .card{display:flex;flex-direction:column;gap:6px;padding:16px 18px;background:var(--surface);
+    border:1px solid var(--sep);border-radius:10px;text-decoration:none;color:var(--text);
+    transition:border-color .15s,background .15s}
+  .card:hover,.card:focus-visible{background:var(--violet);border-color:var(--orange);outline:none}
+  /* titles must never be clipped - they wrap instead */
+  .name{font-weight:700;font-size:17px;line-height:1.3;overflow-wrap:anywhere}
+  .meta{color:var(--text-2);font-size:13px}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--sep);color:var(--text-2);font-size:13px;line-height:1.7}
+  a.plain{color:var(--orange)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Comics</h1>
+    <p class="sub">19 works &middot; 1,157 pages. Art by Snadiya.</p>
+    <div class="grid">
+      <a class="card" href="afflatus.html">
+        <span class="name">Afflatus</span>
+        <span class="meta">229 panels &middot; 8 chapters</span>
+      </a>
+      <a class="card" href="blackgold.html">
+        <span class="name">Black + Gold</span>
+        <span class="meta">30 panels &middot; 3 chapters</span>
+      </a>
+      <a class="card" href="boundborne.html">
+        <span class="name">BoundBorne</span>
+        <span class="meta">314 panels &middot; 4 chapters</span>
+      </a>
+      <a class="card" href="pack01.html">
+        <span class="name">BoundBorne Bonus Pack</span>
+        <span class="meta">10 panels</span>
+      </a>
+      <a class="card" href="corridor.html">
+        <span class="name">Corridor</span>
+        <span class="meta">67 panels</span>
+      </a>
+      <a class="card" href="disgust.html">
+        <span class="name">Disgusting Requests</span>
+        <span class="meta">79 panels</span>
+      </a>
+      <a class="card" href="dovah.html">
+        <span class="name">Dovah</span>
+        <span class="meta">40 panels &middot; 4 chapters</span>
+      </a>
+      <a class="card" href="extra01.html">
+        <span class="name">Extra Pack 01</span>
+        <span class="meta">7 panels</span>
+      </a>
+      <a class="card" href="gag.html">
+        <span class="name">J&amp;J Gagging</span>
+        <span class="meta">31 panels &middot; 4 chapters</span>
+      </a>
+      <a class="card" href="pack1.html">
+        <span class="name">Mummy Pack 01</span>
+        <span class="meta">38 panels</span>
+      </a>
+      <a class="card" href="pack00.html">
+        <span class="name">Pack 00: Character Concepts</span>
+        <span class="meta">6 panels</span>
+      </a>
+      <a class="card" href="pantied.html">
+        <span class="name">PanTied</span>
+        <span class="meta">51 panels</span>
+      </a>
+      <a class="card" href="peril.html">
+        <span class="name">Peril</span>
+        <span class="meta">32 panels &middot; 2 chapters</span>
+      </a>
+      <a class="card" href="program.html">
+        <span class="name">Program</span>
+        <span class="meta">18 panels</span>
+      </a>
+      <a class="card" href="ptw.html">
+        <span class="name">Project T White</span>
+        <span class="meta">40 panels &middot; 5 chapters</span>
+      </a>
+      <a class="card" href="traveler.html">
+        <span class="name">PT: Packaged Traveler</span>
+        <span class="meta">38 panels</span>
+      </a>
+      <a class="card" href="recruit.html">
+        <span class="name">RECRUIT - Caitlyn in the Closet</span>
+        <span class="meta">64 panels</span>
+      </a>
+      <a class="card" href="sid.html">
+        <span class="name">Sid</span>
+        <span class="meta">12 panels</span>
+      </a>
+      <a class="card" href="sim.html">
+        <span class="name">Simulation</span>
+        <span class="meta">51 panels</span>
+      </a>
+    </div>
+    <footer>
+      Reader engine is self-contained &mdash; one HTML file per work, no build step.
+      Page images are served from separate hosts, not from this site.
+    </footer>
+  </div>
+</body>
+</html>

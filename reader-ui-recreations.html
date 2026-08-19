@@ -1,0 +1,971 @@
+<title>Vertical-Scroll Reader UI — Recreations</title>
+<style>
+  :root {
+    --ground: #FAF9F7;
+    --panel: #FFFFFF;
+    --ink: #14151A;
+    --ink-soft: #4A4D57;
+    --muted: #7C808C;
+    --rule: #DFDCD6;
+    --accent: #E5316F;
+    --accent-soft: #FDE7EE;
+    --zone-fwd: rgba(64, 158, 255, 0.30);
+    --zone-back: rgba(229, 49, 111, 0.30);
+    --zone-menu: rgba(255, 193, 7, 0.28);
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0F1013;
+      --panel: #17191E;
+      --ink: #ECEBE8;
+      --ink-soft: #B4B6BE;
+      --muted: #7F838F;
+      --rule: #2A2D35;
+      --accent: #FF5C8A;
+      --accent-soft: #2C1420;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1013;
+    --panel: #17191E;
+    --ink: #ECEBE8;
+    --ink-soft: #B4B6BE;
+    --muted: #7F838F;
+    --rule: #2A2D35;
+    --accent: #FF5C8A;
+    --accent-soft: #2C1420;
+  }
+  :root[data-theme="light"] {
+    --ground: #FAF9F7;
+    --panel: #FFFFFF;
+    --ink: #14151A;
+    --ink-soft: #4A4D57;
+    --muted: #7C808C;
+    --rule: #DFDCD6;
+    --accent: #E5316F;
+    --accent-soft: #FDE7EE;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-weight: 760;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 63ch;
+    margin: 0;
+  }
+
+  .caveat {
+    margin-top: 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 16px 20px;
+    max-width: 72ch;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .caveat strong { color: var(--ink); }
+
+  /* ---- controls ---- */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--ground);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .controls-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  button.tgl {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    background: var(--panel);
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: border-color .15s, color .15s;
+  }
+  button.tgl:hover { border-color: var(--accent); color: var(--ink); }
+  button.tgl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.tgl[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ---- section ---- */
+  section { display: flex; flex-direction: column; gap: 22px; }
+
+  .sec-head { display: flex; flex-direction: column; gap: 8px; }
+  .sec-head h2 {
+    font-size: 25px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0;
+  }
+  .sec-head .src {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(280px, 340px) 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .split { grid-template-columns: 1fr; }
+  }
+  /* desktop-shaped readers need the full width to be legible */
+  .split.wide { grid-template-columns: 1fr; }
+
+  /* ---- device frame ---- */
+  .device {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 9 / 19.5;
+    background: #000;
+    border-radius: 26px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    user-select: none;
+  }
+  .device.desktop {
+    aspect-ratio: 16 / 10;
+    max-width: 100%;
+    border-radius: 6px;
+  }
+
+  .strip {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  .strip::-webkit-scrollbar { display: none; }
+
+  /* comic panels — real gutters, varying heights = pacing */
+  .pnl {
+    width: 100%;
+    display: block;
+    position: relative;
+  }
+  .pnl canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---- chrome overlays (absolute — never displace art) ---- */
+  .chrome {
+    position: absolute;
+    left: 0; right: 0;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease;
+  }
+  .device.chrome-on .chrome { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .chrome { transition: none; }
+  }
+  .chrome.top { top: 0; }
+  .chrome.bot { bottom: 0; }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 12.5px;
+  }
+  .bar .ttl {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .bar .sub {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    opacity: .78;
+    font-variant-numeric: tabular-nums;
+  }
+  .ico {
+    width: 30px; height: 30px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    line-height: 1;
+    border-radius: 3px;
+  }
+
+  /* tap zones */
+  .zones {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: none;
+    pointer-events: none;
+  }
+  .device.zones-on .zones { display: block; }
+  .z {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,.8);
+    border: 1px dashed rgba(255,255,255,.45);
+  }
+  .z.fwd  { background: var(--zone-fwd); }
+  .z.back { background: var(--zone-back); }
+  .z.menu { background: var(--zone-menu); }
+
+  /* ---- annotation ---- */
+  .notes { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .notes h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .notes p { margin: 0 0 10px; font-size: 14.5px; color: var(--ink-soft); max-width: 66ch; }
+  .notes p:last-child { margin-bottom: 0; }
+  .notes strong { color: var(--ink); font-weight: 640; }
+
+  dl.spec {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 7px 16px;
+    font-size: 13.5px;
+    align-items: baseline;
+  }
+  dl.spec dt {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  dl.spec dd { margin: 0; color: var(--ink-soft); }
+  dl.spec code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--accent-soft);
+    color: var(--ink);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  blockquote {
+    margin: 0;
+    border-left: 2px solid var(--rule);
+    padding-left: 16px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  blockquote cite {
+    display: block;
+    margin-top: 6px;
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .verdict {
+    border: 1px solid var(--rule);
+    background: var(--panel);
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .verdict h2 { margin: 0; font-size: 22px; letter-spacing: -0.015em; }
+  .verdict ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .verdict li { font-size: 14.5px; color: var(--ink-soft); }
+  .verdict li strong { color: var(--ink); }
+
+  .flag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--accent);
+    color: #fff;
+    vertical-align: middle;
+  }
+  .flag.ghost {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+  }
+
+  hr.div { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+  .hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Snadiya · vertical-scroll reference</p>
+    <h1>Five reader interfaces, rebuilt from their own source</h1>
+    <p class="lede">Only readers that handle continuous vertical strips. Paged and two-page-spread behaviour is excluded — it does not apply to webcomics. Each frame below is interactive: click it to toggle its chrome, exactly as the real reader does.</p>
+
+    <div class="caveat">
+      <strong>What these are.</strong> Reconstructions from documented structure — component source, CSS constants, keybind tables, and settings docs read directly out of each project. <strong>They are not pixel traces.</strong> App Store screenshots are JS-injected and served placeholder GIFs, and Dribbble blocked automated access, so no reference images were ever obtained. Layout geometry, zone splits, control order and timing values are accurate. <strong>Exact typefaces, icon shapes and brand colours are approximations.</strong> No SEO-blog claims are used anywhere on this page.
+    </div>
+  </header>
+
+  <div class="controls">
+    <span class="controls-label">Overlay</span>
+    <button class="tgl" id="btnZones" aria-pressed="false">Show tap zones</button>
+    <button class="tgl" id="btnChrome" aria-pressed="false">Show all chrome</button>
+    <button class="tgl" id="btnGutter" aria-pressed="false">Highlight gutters</button>
+    <span class="hint">or click any frame</span>
+  </div>
+
+  <!-- ============ 1. WEBTOON ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>1 · WEBTOON <span class="flag">the canonical one</span></h2>
+      <p class="src">Reader view praised without reservation in the Pratt IXD critique — the one screen in the app that isn't fighting itself.</p>
+    </div>
+    <div class="split">
+      <div class="device chrome-on" data-reader="webtoon" tabindex="0" role="button" aria-label="WEBTOON reader — click to toggle chrome">
+        <div class="strip" data-strip></div>
+        <div class="zones">
+          <div class="z menu" style="inset:0;">tap anywhere · toggle chrome</div>
+        </div>
+        <div class="chrome top">
+          <div class="bar" style="background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);">
+            <span class="ico">‹</span>
+            <span class="ttl">Ep. 41 — The Long Way Down<br><span class="sub">SNADIYA</span></span>
+            <span class="ico">☆</span>
+            <span class="ico">⋯</span>
+          </div>
+        </div>
+        <div class="chrome bot">
+          <div class="bar" style="background:linear-gradient(0deg,rgba(0,0,0,.9),transparent);flex-direction:column;align-items:stretch;gap:8px;">
+            <div style="height:3px;background:rgba(255,255,255,.22);position:relative;">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:38%;background:#00D564;"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <span class="ico">‹</span>
+              <span style="flex:1;font-size:11.5px;opacity:.85;">Previous</span>
+              <span class="sub">38%</span>
+              <span style="flex:1;font-size:11.5px;opacity:.85;text-align:right;">Next</span>
+              <span class="ico">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>Why it reads as effortless</h3>
+          <p>Vertical scroll gives <strong>direct gesture-to-progress mapping</strong> — scrolling <em>is</em> reading, and progress is visible through movement. No indirection, no learned mapping, no mode. The feedback is the same physics as every feed the reader already scrolls.</p>
+          <p>There is exactly <strong>one tap zone: the whole screen</strong>, and it toggles chrome. No page-turn zones exist because there are no pages. This is the entire reason the format needs no Guided View — <strong>it already solved what Guided View was invented to patch.</strong></p>
+        </div>
+        <dl class="spec">
+          <dt>Chrome</dt><dd>Top and bottom gradient scrims, no solid bars — art stays visible underneath</dd>
+          <dt>Progress</dt><dd>Thin bar above the bottom controls, brand green</dd>
+          <dt>Tap model</dt><dd>Full-screen toggle only</dd>
+          <dt>Gutters</dt><dd>Author-controlled; reader never trims them</dd>
+        </dl>
+        <blockquote>
+          on the vertical scroll, you have an endless gutter north and south of any panel.
+          <cite>Ethan LeBlanc · WEBTOON Managing Editor · The Beat, Aug 2025</cite>
+        </blockquote>
+        <p style="font-size:13.5px;color:var(--muted);margin:0;">The praise stops at the reader. Everything wrapped around it — coin prompts at cliffhangers, unsignalled paywalls, mid-episode ads — is separately and heavily criticised.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 2. MIHON ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>2 · Mihon — Long Strip <span class="flag">best mechanics</span></h2>
+      <p class="src">Geometry from PagerViewer / WebtoonViewer source and the reader-settings docs. Zone layout selectable below.</p>
+    </div>
+    <div class="split">
+      <div>
+        <div class="device zones-on" data-reader="mihon" tabindex="0" role="button" aria-label="Mihon reader — click to toggle chrome">
+          <div class="strip" data-strip></div>
+          <div class="zones" id="mihonZones"></div>
+          <div class="chrome top">
+            <div class="bar" style="background:rgba(28,27,31,.94);">
+              <span class="ico">←</span>
+              <span class="ttl">Snadiya<br><span class="sub">Ch. 41 — The Long Way Down</span></span>
+              <span class="ico">⤓</span>
+              <span class="ico">⋮</span>
+            </div>
+          </div>
+          <div class="chrome bot">
+            <div class="bar" style="background:rgba(28,27,31,.94);flex-direction:column;align-items:stretch;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="sub">CH 41</span>
+                <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.2);position:relative;">
+                  <div style="position:absolute;left:0;top:0;bottom:0;width:38%;background:#D0BCFF;border-radius:2px;"></div>
+                  <div style="position:absolute;left:38%;top:-4px;width:12px;height:12px;border-radius:50%;background:#D0BCFF;transform:translateX(-50%);"></div>
+                </div>
+                <span class="sub">CH 42</span>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">⚙</span>
+                <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">◐</span>
+                <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">⤢</span>
+                <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">☰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">
+          <button class="tgl zbtn" data-layout="lshape" aria-pressed="true">L-shaped</button>
+          <button class="tgl zbtn" data-layout="default" aria-pressed="false">Default</button>
+          <button class="tgl zbtn" data-layout="kindle" aria-pressed="false">Kindle-ish</button>
+          <button class="tgl zbtn" data-layout="edge" aria-pressed="false">Edge</button>
+          <button class="tgl zbtn" data-layout="rl" aria-pressed="false">Right &amp; Left</button>
+          <button class="tgl zbtn" data-layout="off" aria-pressed="false">Disabled</button>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>The tap-zone model everyone copies</h3>
+          <p>Six named layouts, each invertible horizontally, vertically or both. <strong>L-shaped is the thumb-reach-optimal one</strong> — the forward zone runs along the bottom and right edge, so almost every tap made while holding the phone normally advances.</p>
+          <p>On opening the reader Mihon <strong>flashes a translucent overlay of the current zones, then fades it.</strong> That is the best answer found anywhere to the invisible-chrome learnability problem: immersion and discoverability, for about 600 ms once per session. The overlay above is that flash, held on.</p>
+        </div>
+        <dl class="spec">
+          <dt>Advance</dt><dd>Tap scrolls <code>3/4 screen height</code> — deliberate overlap so you never lose your line</dd>
+          <dt>Prefetch</dt><dd><code>preloadSize = 4</code>, priority queue <code>RETRY 2 / DEFAULT 1 / ADJACENT 0</code></dd>
+          <dt>Next chapter</dt><dd>Preloads when <strong>scroll velocity</strong> crosses a threshold — intent-predictive, not distance-based</dd>
+          <dt>Boundary</dt><dd><code>ReaderTransitionView</code> as a real list item; disableable</dd>
+        </dl>
+        <div>
+          <h3>Two shipped bugs that are free lessons</h3>
+          <p><strong>Anchor zones to the viewport, never the transformed content layer</strong> — v0.17.0 fixed zones shifting after zoom-out. And <strong>a tap that arrests momentum scroll must be swallowed</strong>, not counted as an advance — v0.19.2.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 3. KOMGA ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>3 · Komga — Webtoon mode <span class="flag ghost">exact geometry</span></h2>
+      <p class="src">Zone split read straight out of PagedReader.vue CSS. Chrome order from DivinaReader.vue.</p>
+    </div>
+    <div class="split wide">
+      <div class="device desktop" data-reader="komga" tabindex="0" role="button" aria-label="Komga reader — click to toggle chrome">
+        <div class="strip" data-strip data-pad="1"></div>
+        <div class="zones">
+          <div class="z back" style="left:0;top:0;width:100%;height:25%;">↑ 25% · previous</div>
+          <div class="z menu" style="left:0;top:25%;width:100%;height:50%;">centre 50% · toggle chrome</div>
+          <div class="z fwd" style="left:0;top:75%;width:100%;height:25%;">↓ 25% · next</div>
+        </div>
+        <div class="chrome top">
+          <div class="bar" style="background:rgba(20,20,22,.95);">
+            <span class="ico">←</span>
+            <span class="ttl">Snadiya — Ep. 41</span>
+            <span class="ico">⛶</span>
+            <span class="ico">?</span>
+            <span class="ico">▦</span>
+            <span class="ico">⚙</span>
+            <span class="ico">⋮</span>
+          </div>
+        </div>
+        <div class="chrome bot">
+          <div class="bar" style="background:rgba(20,20,22,.95);">
+            <span class="ico">⏮</span>
+            <span class="ico">‹</span>
+            <div style="flex:1;height:4px;background:rgba(255,255,255,.2);position:relative;border-radius:2px;">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:38%;background:#fff;border-radius:2px;"></div>
+              <div style="position:absolute;left:38%;top:-5px;width:14px;height:14px;border-radius:50%;background:#fff;transform:translateX(-50%);"></div>
+            </div>
+            <span class="sub">14 | 37</span>
+            <span class="ico">›</span>
+            <span class="ico">⏭</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>A 25 / 50 / 25 split, and the centre is huge</h3>
+          <p>In vertical mode the quarters sit top and bottom. <strong>The centre half is dedicated entirely to toggling chrome</strong> — a far larger chrome target than any other reader here, and a deliberate trade: fewer accidental advances, at the cost of a smaller advance zone.</p>
+          <p>There is <strong>no hover reveal.</strong> Click centre or press <code>m</code>. This reads as a defect to new users — the project has a bug report literally titled <em>"No webreader settings or progess bar visible."</em></p>
+        </div>
+        <dl class="spec">
+          <dt>Webtoon opts</dt><dd>Side padding %, page margin, scale type — but only <strong>Original</strong> and <strong>Fit width</strong></dd>
+          <dt>Shortcuts</dt><dd><code>w</code> webtoon · <code>p</code> cycle side padding · <code>n</code> cycle page margin · <code>m</code> toolbars</dd>
+          <dt>Preload</dt><dd>±2, with an offscreen <code>preRender()</code> parked at <code>right:-1000vw</code> so it decodes without painting</dd>
+          <dt>Transitions</dt><dd>Animate on/off is a real boolean — off means a true instant cut</dd>
+        </dl>
+        <div>
+          <h3>Worth stealing: the help dialog</h3>
+          <p>Komga never publishes its shortcut list in the docs. It lives only in an in-app dialog on <code>h</code> that <strong>shows only the shortcuts valid for the current mode</strong>. That context-awareness is a genuinely good idea.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 4. KAVITA ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>4 · Kavita — Infinite Scroll <span class="flag ghost">deepest settings</span></h2>
+      <p class="src">Chrome order from manga-reader.component.html; scroll internals from infinite-scroller.component.ts.</p>
+    </div>
+    <div class="split wide">
+      <div class="device desktop" data-reader="kavita" tabindex="0" role="button" aria-label="Kavita reader — click to toggle chrome">
+        <div class="strip" data-strip data-pad="1"></div>
+        <div class="zones">
+          <div class="z back" style="left:0;top:0;width:100%;height:20%;">↑ previous</div>
+          <div class="z menu" style="left:0;top:20%;width:100%;height:60%;">centre · toggle chrome</div>
+          <div class="z fwd" style="left:0;top:80%;width:100%;height:20%;">↓ next</div>
+        </div>
+        <div class="chrome top">
+          <div class="bar" style="background:rgba(18,20,24,.96);">
+            <span class="ico">←</span>
+            <span class="ttl">Snadiya<br><span class="sub">EP. 41 · SERIES 38%</span></span>
+            <span class="ico">⌨</span>
+            <span class="ico">🔖</span>
+          </div>
+        </div>
+        <div class="chrome bot">
+          <div class="bar" style="background:rgba(18,20,24,.96);flex-direction:column;align-items:stretch;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="ico">⏮</span><span class="ico">⇤</span>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.2);position:relative;border-radius:2px;">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:38%;background:#4DB6E2;border-radius:2px;"></div>
+                <div style="position:absolute;left:38%;top:-5px;width:14px;height:14px;border-radius:50%;background:#4DB6E2;transform:translateX(-50%);"></div>
+              </div>
+              <span class="ico">⇥</span><span class="ico">⏭</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;font-size:10px;">LTR</span>
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;font-size:10px;">SCROLL</span>
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">⛶</span>
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">⚙</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>Reading Profiles — the one idea worth copying wholesale</h3>
+          <p>Settings resolve through a real cascade: <strong>implicit (device-generated) → series-bound → library-bound → user default</strong>, with device-matching profiles winning at each tier. Tweak anything mid-read and it silently creates an implicit profile you can name and keep later.</p>
+          <p>This is the mature answer to the single loudest cross-venue complaint in the whole research — <strong>settings that aren't scoped to the mode they belong to.</strong> Komga, MangaDex and KOReader users all hit it independently, and in two of three cases shipped their own userscripts rather than wait.</p>
+        </div>
+        <dl class="spec">
+          <dt>Auto-detect</dt><dd>Opens webtoon content in webtoon mode automatically — user-reported ~80% hit rate</dd>
+          <dt>Prefetch</dt><dd><code>PREFETCH_PAGES = 10</code> circular buffer, <strong>plus first/last 5 of the adjacent chapter</strong> within 10 of a boundary</dd>
+          <dt>Scroll</dt><dd>Debounced 20 ms; native <code>scrollend</code> with a <strong>100 ms polling fallback for Safari</strong></dd>
+          <dt>Chrome timer</dt><dd><code>OVERLAY_AUTO_CLOSE_TIME = 3000</code> ms, suppressed while the settings drawer is open</dd>
+          <dt>Page turns</dt><dd>Instant image swap — no animation anywhere in this reader</dd>
+        </dl>
+        <div>
+          <h3>The bug to design against</h3>
+          <p>Auto-advance doesn't respect already-read state: opening a read chapter in webtoon mode scrolls to the bottom, skips to the next, and <strong>if that one is also read, continues endlessly.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 5. MANGADEX ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>5 · MangaDex — Long Strip <span class="flag ghost">best edge case</span></h2>
+      <p class="src">Sidebar model and the chapter-gap warning, which nothing else here has.</p>
+    </div>
+    <div class="split wide">
+      <div class="device desktop" data-reader="mangadex" tabindex="0" role="button" aria-label="MangaDex reader — click to toggle chrome">
+        <div class="strip" data-strip data-pad="1"></div>
+        <div class="zones">
+          <div class="z menu" style="left:0;top:0;width:100%;height:100%;">middle · open menu panel</div>
+        </div>
+        <!-- side drawer, absolutely positioned — never displaces the strip -->
+        <div class="chrome" style="top:0;bottom:0;left:0;right:auto;width:216px;">
+          <div style="height:100%;background:rgba(22,22,26,.97);display:flex;flex-direction:column;gap:12px;padding:14px;color:#fff;border-right:1px solid rgba(255,255,255,.1);">
+            <div style="font-weight:650;font-size:13px;line-height:1.3;">Snadiya</div>
+            <div class="sub" style="font-size:10.5px;">EP. 41 — THE LONG WAY DOWN</div>
+            <div style="height:1px;background:rgba(255,255,255,.12);"></div>
+            <div style="display:flex;gap:6px;">
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">‹</span>
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:2;font-size:10px;">EP 41</span>
+              <span class="ico" style="background:rgba(255,255,255,.09);flex:1;">›</span>
+            </div>
+            <!-- the gap warning -->
+            <div style="background:#7A3A12;border:1px solid #C2701F;padding:9px 10px;font-size:10.5px;line-height:1.45;border-radius:2px;">
+              <strong style="display:block;margin-bottom:3px;">Chapter gap</strong>
+              Next available is Ep. 47. Episodes 42–46 are not yet posted.
+            </div>
+            <div style="margin-top:auto;display:flex;flex-direction:column;gap:7px;font-size:11px;">
+              <div style="opacity:.8;">Long strip ▾</div>
+              <div style="opacity:.8;">Fit width ▾</div>
+              <div style="opacity:.8;">Turn page in long strip · off</div>
+              <div style="opacity:.55;font-family:var(--mono);font-size:10px;">Settings ⚙</div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:10px;right:14px;z-index:22;font-family:var(--mono);font-size:11px;color:#fff;text-shadow:0 1px 4px #000;font-variant-numeric:tabular-nums;">14 / 37</div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>The chapter-gap warning</h3>
+          <p>Nothing else surveyed has this. It warns when advancing would <strong>skip episodes that simply don't exist yet</strong> — exactly right for serialised work published on an irregular cadence, which is what a webcomic is.</p>
+        </div>
+        <div>
+          <h3>And the one setting split done right</h3>
+          <p><strong>"Turn page in long strip mode" is an independent toggle.</strong> It disables tap-to-advance in continuous mode without touching page-turning in paged modes. That is the correct shape for a per-mode setting, and MangaDex is the only reader here that got it right.</p>
+          <p>Which makes the rest more frustrating: <strong>image-fit is global across modes</strong>, so the setting that makes a long strip readable makes paged content unreadable. The dev acknowledged it — <em>"It is just already quite a lot of options to fit together"</em> — and two years later the community shipped a userscript instead.</p>
+        </div>
+        <dl class="spec">
+          <dt>Chrome</dt><dd>Collapsible left drawer, opt-in auto-hide, absolutely positioned</dd>
+          <dt>Extras</dt><dd>Immersive mode · hide cursor over images after 2 s · persistent page counter</dd>
+          <dt>Known bug</dt><dd>Fullscreen in long strip <strong>resets to page one</strong> — staff-acknowledged, no ETA</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <div class="verdict">
+    <h2>What to take for Snadiya</h2>
+    <ol>
+      <li><strong>One tap zone, not three.</strong> A vertical strip has no pages, so page-turn zones are borrowed complexity. WEBTOON's whole-screen chrome toggle is the honest model. If you add tap-to-advance later, make it a separate toggle the way MangaDex did — never wired to the same setting as paged behaviour.</li>
+      <li><strong>Never trim whitespace.</strong> Gutters are the author's timing instrument — "an endless gutter north and south of any panel." A global crop-borders setting destroys pacing. If you offer trim at all, scope it to paged content only.</li>
+      <li><strong>Don't impose a background colour behind the strip.</strong> Gutter colour is an authored choice; one creator picked black gutters specifically because they read as spooky. A reader-level background picker overrides intent.</li>
+      <li><strong>Advance by ~3/4 of the viewport, not a full screen.</strong> The overlap is what stops readers losing their line. Mihon shipped this deliberately.</li>
+      <li><strong>Flash the tap zones once on open, then fade.</strong> It costs ~600 ms and buys you immersion without the mystery-meat problem that Komga and MangaDex both demonstrably have.</li>
+      <li><strong>Scope every setting to its mode from day one.</strong> This is the loudest unmet need across every venue where real users talk. Kavita's profile cascade is the reference implementation. Retrofitting it is what MangaDex has been unable to do for two years.</li>
+      <li><strong>Preload bidirectionally and by pixel distance, not page count.</strong> Readers re-scroll constantly, and variable panel heights break count-based windows. Prioritise the visible page above prefetch work, and target 0.1 s for the next screen — decoded and resident, not merely downloaded.</li>
+      <li><strong>Zoom is the universal failure — and your escape hatch.</strong> Kavita, Komga, MangaDex and Kindle Cloud Reader all lack working zoom for the same architectural reason: CSS width/height clamping for fit modes kills native browser zoom. An in-canvas transform-based zoom layer sidesteps it entirely, and is the clearest differentiator available in this space.</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- panel art: abstract vertical-strip pages with real gutters ----
+  var PALETTES = {
+    webtoon:  ["#2E3B52", "#4A6081", "#8CA6C4", "#D8E3EF", "#1B2333"],
+    mihon:    ["#33294A", "#544177", "#8E77B8", "#DCD2EC", "#1E1830"],
+    komga:    ["#1F3330", "#365B52", "#6E9B8D", "#D3E5DE", "#152321"],
+    kavita:   ["#213542", "#365A6E", "#6E9DB4", "#D5E6EE", "#16242D"],
+    mangadex: ["#42301F", "#6E5133", "#AD8757", "#EDDDC7", "#2B1F14"]
+  };
+
+  // panel heights as a fraction of frame width — varying = pacing
+  var LAYOUT = [0.62, 0.34, 0.34, 0.95, 0.44, 0.28, 0.72, 0.50, 0.38, 0.86, 0.46, 0.60];
+
+  function drawPanel(cv, w, h, pal, seed) {
+    var ctx = cv.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    ctx.scale(dpr, dpr);
+
+    var r = seed * 9301 % 233280 / 233280;
+    var r2 = (seed * 4931 + 77) % 233280 / 233280;
+
+    // ground
+    var g = ctx.createLinearGradient(0, 0, w * 0.6, h);
+    g.addColorStop(0, pal[0]);
+    g.addColorStop(1, pal[4]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    // horizon / mid band
+    ctx.fillStyle = pal[1];
+    var hy = h * (0.42 + r * 0.28);
+    ctx.beginPath();
+    ctx.moveTo(0, hy);
+    ctx.lineTo(w, hy - h * 0.06 * r2);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+
+    // subject shape
+    ctx.fillStyle = pal[2];
+    var cx = w * (0.22 + r2 * 0.52);
+    var rad = Math.min(w, h) * (0.10 + r * 0.10);
+    ctx.beginPath();
+    ctx.arc(cx, hy - rad * 0.85, rad, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillRect(cx - rad * 0.55, hy - rad * 0.1, rad * 1.1, h - hy + rad * 0.1);
+
+    // light source
+    ctx.fillStyle = pal[3];
+    ctx.globalAlpha = 0.5 + r * 0.3;
+    ctx.beginPath();
+    ctx.arc(w * (0.7 + r * 0.2), h * (0.12 + r2 * 0.14), Math.min(w, h) * 0.055, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // screentone dots — the thing that bands under RGB_565
+    ctx.fillStyle = pal[3];
+    ctx.globalAlpha = 0.13;
+    for (var y = hy + 6; y < h; y += 7) {
+      for (var x = 4; x < w; x += 7) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.05, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function buildStrip(el, reader) {
+    var pal = PALETTES[reader] || PALETTES.webtoon;
+    var pad = el.getAttribute("data-pad") ? 0.18 : 0;
+    // measure the frame, not the scroll container — the strip can report a
+    // stale width before the grid column has settled
+    var dev = el.closest(".device");
+    var frameW = (dev && dev.clientWidth) || el.clientWidth || 320;
+    if (frameW < 40) { return; }
+    el.setAttribute("data-built-at", String(frameW));
+    var contentW = Math.round(frameW * (1 - pad));
+    var offset = Math.round((frameW - contentW) / 2);
+
+    el.textContent = "";
+    LAYOUT.forEach(function (frac, i) {
+      var h = Math.round(contentW * frac);
+      var d = document.createElement("div");
+      d.className = "pnl";
+      d.style.width = contentW + "px";
+      d.style.height = h + "px";
+      d.style.marginLeft = offset + "px";
+      // real gutter between panels — never collapsed
+      d.style.marginBottom = (i === LAYOUT.length - 1 ? 0 : 10) + "px";
+      var cv = document.createElement("canvas");
+      cv.style.width = contentW + "px";
+      cv.style.height = h + "px";
+      d.appendChild(cv);
+      el.appendChild(d);
+      drawPanel(cv, contentW, h, pal, i + 1);
+    });
+  }
+
+  function buildAll() {
+    document.querySelectorAll("[data-strip]").forEach(function (el) {
+      var dev = el.closest(".device");
+      buildStrip(el, dev.getAttribute("data-reader"));
+      el.scrollTop = Math.round(el.scrollHeight * 0.30);
+    });
+  }
+
+  buildAll();
+
+  // rebuild when a frame's width actually changes — covers late grid/font layout
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function (entries) {
+      entries.forEach(function (en) {
+        var dev = en.target;
+        var strip = dev.querySelector("[data-strip]");
+        if (!strip) { return; }
+        var built = parseInt(strip.getAttribute("data-built-at") || "0", 10);
+        if (Math.abs(dev.clientWidth - built) > 2) {
+          buildStrip(strip, dev.getAttribute("data-reader"));
+          strip.scrollTop = Math.round(strip.scrollHeight * 0.30);
+        }
+      });
+    });
+    document.querySelectorAll(".device").forEach(function (d) { ro.observe(d); });
+  }
+
+  var rt;
+  window.addEventListener("resize", function () {
+    clearTimeout(rt);
+    rt = setTimeout(buildAll, 180);
+  });
+
+  // ---- click a frame to toggle its chrome ----
+  document.querySelectorAll(".device").forEach(function (dev) {
+    function toggle() { dev.classList.toggle("chrome-on"); }
+    dev.addEventListener("click", toggle);
+    dev.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+  });
+
+  // ---- global toggles ----
+  function wire(btn, fn) {
+    btn.addEventListener("click", function () {
+      var on = btn.getAttribute("aria-pressed") === "true";
+      btn.setAttribute("aria-pressed", String(!on));
+      fn(!on);
+    });
+  }
+
+  wire(document.getElementById("btnZones"), function (on) {
+    document.querySelectorAll(".device").forEach(function (d) {
+      d.classList.toggle("zones-on", on);
+    });
+  });
+
+  wire(document.getElementById("btnChrome"), function (on) {
+    document.querySelectorAll(".device").forEach(function (d) {
+      d.classList.toggle("chrome-on", on);
+    });
+  });
+
+  wire(document.getElementById("btnGutter"), function (on) {
+    document.querySelectorAll(".pnl").forEach(function (p) {
+      p.style.outline = on ? "1px solid rgba(255,92,138,.85)" : "";
+      p.style.outlineOffset = on ? "0" : "";
+    });
+    document.querySelectorAll("[data-strip]").forEach(function (s) {
+      s.style.background = on ? "rgba(255,92,138,.16)" : "";
+    });
+  });
+
+  // ---- Mihon zone layouts (geometry per documented layout) ----
+  var ZONES = {
+    lshape: [
+      { c: "back", css: "left:0;top:0;width:100%;height:33%;", t: "back" },
+      { c: "menu", css: "left:0;top:33%;width:66%;height:34%;", t: "menu" },
+      { c: "fwd",  css: "left:66%;top:33%;width:34%;height:67%;", t: "forward" },
+      { c: "fwd",  css: "left:0;top:67%;width:66%;height:33%;", t: "forward" }
+    ],
+    default: [
+      { c: "back", css: "left:0;top:0;width:100%;height:33%;", t: "back" },
+      { c: "menu", css: "left:0;top:33%;width:100%;height:34%;", t: "menu" },
+      { c: "fwd",  css: "left:0;top:67%;width:100%;height:33%;", t: "forward" }
+    ],
+    kindle: [
+      { c: "menu", css: "left:0;top:0;width:100%;height:20%;", t: "menu" },
+      { c: "back", css: "left:0;top:20%;width:33%;height:80%;", t: "back" },
+      { c: "fwd",  css: "left:33%;top:20%;width:67%;height:80%;", t: "forward" }
+    ],
+    edge: [
+      { c: "back", css: "left:0;top:0;width:100%;height:14%;", t: "back" },
+      { c: "menu", css: "left:0;top:14%;width:100%;height:72%;", t: "menu · maximised" },
+      { c: "fwd",  css: "left:0;top:86%;width:100%;height:14%;", t: "forward" }
+    ],
+    rl: [
+      { c: "back", css: "left:0;top:0;width:50%;height:100%;", t: "back" },
+      { c: "fwd",  css: "left:50%;top:0;width:50%;height:100%;", t: "forward" }
+    ],
+    off: [
+      { c: "menu", css: "left:0;top:0;width:100%;height:100%;", t: "disabled · swipe only" }
+    ]
+  };
+
+  var mz = document.getElementById("mihonZones");
+  function paintZones(name) {
+    mz.textContent = "";
+    ZONES[name].forEach(function (z) {
+      var d = document.createElement("div");
+      d.className = "z " + z.c;
+      d.setAttribute("style", z.css);
+      d.textContent = z.t;
+      mz.appendChild(d);
+    });
+  }
+  paintZones("lshape");
+
+  document.querySelectorAll(".zbtn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".zbtn").forEach(function (o) {
+        o.setAttribute("aria-pressed", "false");
+      });
+      b.setAttribute("aria-pressed", "true");
+      paintZones(b.getAttribute("data-layout"));
+      b.closest(".device, div").querySelector; // no-op guard
+      document.querySelector('[data-reader="mihon"]').classList.add("zones-on");
+    });
+  });
+})();
+</script>

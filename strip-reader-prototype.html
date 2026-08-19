@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<title>BoundBorne — Snadiya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#1e1b2c;
+    --bar:#251c36;
+    --strip:#393047;
+    --line:#5a356a;
+    --amber:#f49c58;
+    --amber-dk:#1e1b2c;
+    --muted:#cda6b5; --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184; --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
+    --text:#ecc1c2;
+
+    --bar-h: 60px;
+    --chapstrip-h: 36px;
+    --font: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* =========================================================
+     SHARED CONTROLS
+     ========================================================= */
+  .btn {
+    flex: none;
+    min-width: 48px; min-height: 48px;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 0 14px;
+    font-family: var(--font); font-size: 16px; font-weight: 600;
+    color: var(--text); background: transparent;
+    border: 1px solid transparent; border-radius: 3px;
+    cursor: pointer; touch-action: manipulation;
+  }
+  .btn:hover { background: #1c1813; }
+  .btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .btn[aria-pressed="true"] { color: var(--amber); border-color: var(--line); }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .btn:disabled:hover { background: transparent; }
+
+  .btn.primary {
+    background: var(--amber); color: var(--amber-dk);
+    font-weight: 700; border-color: var(--amber);
+  }
+  .btn.primary:hover { background: #e5b055; }
+  .btn.primary:disabled { background: var(--line); color: var(--muted); border-color: var(--line); }
+
+  .row { display: flex; align-items: center; gap: 12px; height: var(--bar-h); padding: 0 12px; }
+
+  .title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .title b { font-size: 16px; font-weight: 700; line-height: 1.2; }
+  .title span { font-size: 16px; font-weight: 400; color: var(--muted); line-height: 1.2; }
+
+  /* mode toggle — a primary reading decision, so it lives in the bar,
+     not buried in a menu */
+  .seg {
+    flex: none; display: flex;
+    border: 1px solid var(--line); border-radius: 3px; overflow: hidden;
+  }
+  .seg button {
+    min-height: 44px; padding: 0 14px;
+    font-family: var(--font); font-size: 16px; font-weight: 600;
+    background: transparent; color: var(--muted);
+    border: 0; cursor: pointer; touch-action: manipulation;
+  }
+  .seg button[aria-pressed="true"] { background: var(--amber); color: var(--amber-dk); font-weight: 700; }
+  .seg button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+
+  /* =========================================================
+     STRIP MODE
+     ========================================================= */
+  #viewport {
+    position: fixed; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-y pinch-zoom;
+    display: none;
+  }
+  #viewport::-webkit-scrollbar { display: none; }
+  body[data-mode="strip"] #viewport { display: block; }
+
+  /* zoom on a transform layer — never width/height clamping */
+  #zoomLayer { transform-origin: 0 0; will-change: transform; }
+
+  .panel { display: block; width: 100%; background: var(--strip); position: relative; }
+  .panel img { display: block; width: 100%; height: auto; }
+  .panel.pending::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 26px; height: 26px; margin: -13px 0 0 -13px;
+    border: 2px solid var(--line); border-top-color: var(--amber);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .panel.pending::after { animation: none; } }
+
+  .chapmark { padding: 64px 24px; text-align: center; background: var(--bg); }
+  .chapmark .k {
+    font-size: 16px; font-weight: 700; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+  }
+  .chapmark .t { font-size: 28px; font-weight: 900; color: var(--text); margin: 0; }
+  .chapmark hr { border: 0; border-top: 1px solid var(--line); width: 72px; margin: 22px auto 0; }
+
+  .endcap { padding: 80px 24px 120px; text-align: center; background: var(--bg); }
+  .endcap p { font-size: 16px; color: var(--muted); margin: 0 0 20px; }
+  .endcap a {
+    display: inline-block; font-size: 16px; font-weight: 700;
+    padding: 14px 26px; color: var(--amber-dk); background: var(--amber);
+    text-decoration: none; border-radius: 2px;
+  }
+
+  /* auto-hiding chrome, strip mode only */
+  .chrome {
+    position: fixed; left: 0; right: 0; z-index: 30;
+    opacity: 0; transform: translateY(var(--slide, 0));
+    pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  body[data-mode="strip"].chrome-on .chrome {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  body[data-mode="paged"] .chrome { display: none; }
+  @media (prefers-reduced-motion: reduce) { .chrome { transition: none; } }
+
+  #topbar { top: 0; --slide: -12px; background: var(--bar); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top); }
+  #botbar { bottom: 0; --slide: 12px; background: var(--bar); border-top: 1px solid var(--line); padding-bottom: max(env(safe-area-inset-bottom), 8px); }
+
+  #scrubWrap { position: relative; flex: 1; height: 48px; display: flex; align-items: center; cursor: pointer; touch-action: none; }
+  #scrubTrack { position: relative; width: 100%; height: 6px; background: var(--line); border-radius: 3px; }
+  #scrubFill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--amber); border-radius: 3px; }
+  #scrubKnob { position: absolute; top: 50%; left: 0; width: 18px; height: 18px; margin: -9px 0 0 -9px; background: var(--amber); border-radius: 50%; transition: transform .12s ease; }
+  #scrubWrap:active #scrubKnob { transform: scale(1.5); }
+  .chaptick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--muted); pointer-events: none; }
+  .pct { flex: none; font-size: 16px; font-weight: 700; color: var(--amber); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+
+  /* =========================================================
+     PAGED MODE — the original system, chrome always visible
+     ========================================================= */
+  #paged {
+    position: fixed; inset: 0;
+    display: none; flex-direction: column;
+    background: var(--bg);
+  }
+  body[data-mode="paged"] #paged { display: flex; }
+
+  #pagedTop { flex: none; background: var(--bar); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top); }
+
+  /* chapter strip — fixed 36px, never changes height.
+     Dot rows scroll horizontally inside themselves, never wrap. */
+  #chapStrip {
+    flex: none;
+    height: var(--chapstrip-h);
+    background: var(--strip);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: stretch;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  #chapStrip::-webkit-scrollbar { display: none; }
+
+  .chapgroup { display: flex; align-items: center; gap: 8px; padding: 0 14px; flex: none; }
+  .chapgroup + .chapgroup { border-left: 1px solid var(--line); }
+  .chaplabel {
+    font-family: var(--font); font-size: 16px; font-weight: 700;
+    letter-spacing: .10em; text-transform: uppercase;
+    color: var(--muted); background: transparent; border: 0;
+    cursor: pointer; padding: 0; white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .chapgroup.active .chaplabel { color: var(--amber); }
+  .chaplabel:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  /* progressive disclosure: only the ACTIVE chapter renders its dots */
+  .dotrow {
+    display: none; align-items: center; gap: 5px;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
+    max-width: 46vw;
+    height: var(--chapstrip-h);
+  }
+  .dotrow::-webkit-scrollbar { display: none; }
+  .chapgroup.active .dotrow { display: flex; }
+
+  .dot {
+    flex: none;
+    width: 22px; height: var(--chapstrip-h);
+    padding: 0; margin: 0;
+    background: transparent; border: 0; cursor: pointer;
+    position: relative;
+    touch-action: manipulation;
+  }
+  .dot::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+    background: var(--line); border-radius: 50%;
+    transition: background .12s ease, transform .12s ease;
+  }
+  .dot:hover::after { background: var(--muted); }
+  .dot[aria-current="true"]::after { background: var(--amber); transform: scale(1.5); }
+  .dot.read::after { background: var(--muted); }
+  .dot:focus-visible { outline: 2px solid var(--amber); outline-offset: -4px; }
+
+  /* page stage */
+  #stage {
+    flex: 1; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px;
+    overflow: auto;
+  }
+  #stage img {
+    display: block;
+    max-width: 100%; max-height: 100%;
+    width: auto; height: auto;
+    object-fit: contain;
+  }
+  #stage.loading { position: relative; }
+  #stage.loading::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 30px; height: 30px; margin: -15px 0 0 -15px;
+    border: 2px solid var(--line); border-top-color: var(--amber);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+
+  #pagedBot {
+    flex: none; background: var(--bar); border-top: 1px solid var(--line);
+    padding-bottom: max(env(safe-area-inset-bottom), 8px);
+  }
+  .pagednav {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+  }
+  .pagedmid { flex: 1; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+  .pagedmid .sec {
+    font-size: 16px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .pagedmid .num { font-size: 16px; font-weight: 700; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .pagedmid .hint { font-size: 16px; color: var(--muted); }
+  @media (max-width: 620px) { .pagedmid .hint { display: none; } }
+
+  /* =========================================================
+     MENU / OVERLAYS
+     ========================================================= */
+  .menuwrap { position: relative; flex: none; }
+  .menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    width: 264px; background: var(--bar);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 8px; display: none; flex-direction: column; gap: 2px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.6); z-index: 70;
+  }
+  .menu.open { display: flex; }
+  .menu button { width: 100%; justify-content: flex-start; min-height: 48px; }
+  .menu .sep { border-top: 1px solid var(--line); margin: 6px 0; }
+  .menu .lbl {
+    font-size: 16px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); padding: 8px 14px 4px;
+  }
+
+  #flash {
+    position: fixed; inset: 0; z-index: 60;
+    display: grid; place-items: center;
+    background: rgba(10,9,8,.72);
+    opacity: 0; pointer-events: none; transition: opacity .45s ease;
+  }
+  #flash.show { opacity: 1; }
+  #flash .card {
+    text-align: center; padding: 28px 34px;
+    border: 1px solid var(--line); background: var(--bar);
+    border-radius: 3px; max-width: 84vw;
+  }
+  #flash .card b { display: block; font-size: 20px; font-weight: 900; color: var(--amber); margin-bottom: 10px; }
+  #flash .card p { margin: 0; font-size: 16px; line-height: 1.5; }
+  #flash .card .k { display: block; margin-top: 14px; font-size: 16px; color: var(--muted); }
+
+  #toast {
+    position: fixed; left: 50%; bottom: calc(var(--bar-h) + 28px);
+    transform: translateX(-50%) translateY(8px); z-index: 65;
+    background: var(--bar); border: 1px solid var(--line);
+    font-size: 16px; padding: 12px 20px; border-radius: 3px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #resume {
+    position: fixed; left: 12px; right: 12px; bottom: calc(var(--bar-h) + 20px);
+    z-index: 55; background: var(--bar); border: 1px solid var(--amber);
+    border-radius: 3px; padding: 16px 18px;
+    display: none; align-items: center; gap: 14px;
+  }
+  #resume.show { display: flex; }
+  #resume p { flex: 1; margin: 0; font-size: 16px; line-height: 1.35; }
+  #resume p b { color: var(--amber); }
+
+  @media (max-width: 560px) { .hide-sm { display: none; } }
+</style>
+</head>
+<body data-mode="strip">
+
+<!-- ===================== STRIP MODE ===================== -->
+<div id="viewport"><div id="zoomLayer"></div></div>
+
+<div class="chrome" id="topbar">
+  <div class="row">
+    <button class="btn" id="btnBack" aria-label="Back to index">‹</button>
+    <div class="title">
+      <b>BoundBorne</b>
+      <span id="chapNow">Prologue</span>
+    </div>
+    <div class="seg" role="group" aria-label="Reading mode">
+      <button id="segStrip" aria-pressed="true">Strip</button>
+      <button id="segPaged" aria-pressed="false">Pages</button>
+    </div>
+    <div class="menuwrap">
+      <button class="btn" id="btnMenu" aria-expanded="false" aria-controls="menu">☰</button>
+      <div id="menu" class="menu" role="menu">
+        <div class="lbl">Jump to chapter</div>
+        <button class="btn" data-jump="0" role="menuitem">Prologue</button>
+        <button class="btn" data-jump="1" role="menuitem">Chapter 1</button>
+        <button class="btn" data-jump="2" role="menuitem">Chapter 2</button>
+        <div class="sep"></div>
+        <div class="lbl">Strip settings</div>
+        <button class="btn" id="mFit" role="menuitem">Reset zoom</button>
+        <button class="btn" id="mTap" role="menuitem" aria-pressed="false">Tap to advance</button>
+        <button class="btn" id="mMark" role="menuitem" aria-pressed="true">Chapter markers</button>
+        <button class="btn" id="mZones" role="menuitem">Show tap zones</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chrome" id="botbar">
+  <div class="row">
+    <button class="btn" id="btnPrevChap" aria-label="Previous chapter">⏮</button>
+    <div id="scrubWrap" role="slider" tabindex="0" aria-label="Reading position"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="scrubTrack"><div id="scrubFill"></div><div id="scrubKnob"></div></div>
+    </div>
+    <span class="pct" id="pct">0%</span>
+    <button class="btn" id="btnNextChap" aria-label="Next chapter">⏭</button>
+  </div>
+</div>
+
+<!-- ===================== PAGED MODE ===================== -->
+<div id="paged">
+  <div id="pagedTop">
+    <div class="row">
+      <button class="btn" id="pBack" aria-label="Back to index">‹</button>
+      <div class="title">
+        <b>BoundBorne</b>
+        <span id="pCounter">1 / 125</span>
+      </div>
+      <button class="btn hide-sm" id="pPrev">‹ Prev</button>
+      <button class="btn primary hide-sm" id="pNext">Next ›</button>
+      <div class="seg" role="group" aria-label="Reading mode">
+        <button id="segStrip2" aria-pressed="false">Strip</button>
+        <button id="segPaged2" aria-pressed="true">Pages</button>
+      </div>
+      <div class="menuwrap">
+        <button class="btn" id="pBtnMenu" aria-expanded="false" aria-controls="pMenu">☰</button>
+        <div id="pMenu" class="menu" role="menu">
+          <div class="lbl">Jump to chapter</div>
+          <button class="btn" data-pjump="0" role="menuitem">Prologue</button>
+          <button class="btn" data-pjump="1" role="menuitem">Chapter 1</button>
+          <button class="btn" data-pjump="2" role="menuitem">Chapter 2</button>
+          <div class="sep"></div>
+          <div class="lbl">Page settings</div>
+          <button class="btn" id="pFit" role="menuitem" aria-pressed="true">Fit to screen</button>
+          <button class="btn" id="pDots" role="menuitem" aria-pressed="true">Page dots</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="chapStrip" aria-label="Chapters and pages"></div>
+
+  <div id="stage"></div>
+
+  <div id="pagedBot">
+    <div class="pagednav">
+      <button class="btn" id="pPrev2">‹ Previous Page</button>
+      <div class="pagedmid">
+        <span class="sec" id="pSection">Prologue</span>
+        <span class="num" id="pNum">1 / 125</span>
+        <span class="hint">← → arrow keys to navigate</span>
+      </div>
+      <button class="btn primary" id="pNext2">Next Page ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== OVERLAYS ===================== -->
+<div id="flash" aria-hidden="true">
+  <div class="card">
+    <b>Tap anywhere to show controls</b>
+    <p>Scroll to read. Nothing else to learn.</p>
+    <span class="k">Space advances · ← → jump chapter</span>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="resume">
+  <p>You left off partway through.</p>
+  <button class="btn primary" id="btnResume">Resume</button>
+  <button class="btn" id="btnDismissResume">Start over</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     CONTENT
+     ========================================================= */
+  var BASE = "https://mira-96.nekoweb.org/";
+
+  // Panel heights are NOT uniform — measured across all 125 they run
+  // 888..2410px at a constant 1920 width (20 distinct sizes). Every box is
+  // reserved at its true ratio so the strip never shifts under the reader.
+  var DIMS = [
+    [1920,1920],[1920,2410],[1920,2080],[1920,2171],[1920,1072],[1920,2137],[1920,1082],[1920,1080],[1920,2171],[1920,1046],[1920,1025],[1920,1080],[1920,1080],
+    [1920,1040],[1920,1001],[1920,904],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],
+    [1920,888],[1920,1001],[1920,995],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],
+    [1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1042],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],
+    [1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],
+    [1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],[1920,1040],[1920,1001],[1920,1001],[1920,1041],
+    [1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],
+    [1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],
+    [1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],
+    [1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054],[1920,1053],[1920,1027],[1920,1027],[1920,1054]
+  ];
+
+  // Real transfer size of every page in KB, read off the live server.
+  // Used to budget the background warm when the Resource Timing API can't
+  // report transferSize (it returns 0 for cross-origin images unless the
+  // host sends Timing-Allow-Origin, which Nekoweb does not).
+  var KB = [
+    381,486,399,346,123,419,135,160,405,55,122,139,79,171,161,173,178,133,205,178,195,182,179,188,207,191,176,197,192,180,
+    140,209,228,176,195,223,224,170,173,207,206,182,186,201,222,194,201,224,189,157,142,171,205,207,199,255,188,118,189,189,
+    216,190,181,210,214,193,251,225,197,195,227,229,285,143,200,179,216,144,184,247,272,208,169,222,213,109,194,251,207,165,
+    220,209,203,186,210,221,200,218,200,198,205,168,231,203,234,256,208,199,228,225,246,281,205,192,260,196,264,219,201,162,
+    230,202,202,195,291
+  ];
+
+  var CHAPTERS = [
+    { title: "Prologue",  dir: "prologue/", prefix: "p",      pad: 2, from: 1,  to: 13 },
+    { title: "Chapter 1", dir: "bb/",       prefix: "panel_", pad: 3, from: 20, to: 83 },
+    { title: "Chapter 2", dir: "bb/",       prefix: "panel_", pad: 3, from: 84, to: 131 }
+  ];
+
+  function pad(n, w) { var s = String(n); while (s.length < w) { s = "0" + s; } return s; }
+
+  var PANELS = [];
+  CHAPTERS.forEach(function (ch, ci) {
+    ch.startIndex = PANELS.length;
+    for (var n = ch.from; n <= ch.to; n++) {
+      var i = PANELS.length, d = DIMS[i] || [1920, 1040];
+      PANELS.push({ src: BASE + ch.dir + ch.prefix + pad(n, ch.pad) + ".jpg", chapter: ci, w: d[0], h: d[1] });
+    }
+    ch.endIndex = PANELS.length - 1;
+  });
+  var TOTAL = PANELS.length;
+
+  /* =========================================================
+     SIZE-AWARE LOADING STRATEGY
+
+     These comics are short. Across the whole site the range is 11 to 125
+     panels, and everything except BoundBorne sits under 80. At that size a
+     windowed loader is over-engineering: the entire book is a few tens of
+     megabytes and the reader will see all of it in one sitting.
+
+     So: window only while it matters, then quietly warm the rest in the
+     background at low priority. Short comics end up fully resident within
+     seconds of opening, which is what makes paged mode feel instant.
+     ========================================================= */
+  /* Budget the background warm in BYTES, not pages — the same mistake as a
+     page-count preload window. BoundBorne is 25.2 MB across 125 pages
+     (206 KB average, 486 KB worst). "80 pages" tells you nothing about
+     whether that's 4 MB or 25 MB of someone's mobile data.
+
+     Measured off the live site, so these are real figures, not guesses. */
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+
+  function warmBudgetBytes() {
+    if (conn && conn.saveData) { return 0; }                       // Data Saver on: never speculate
+    var t = conn && conn.effectiveType;
+    if (t === "slow-2g" || t === "2g") { return 0; }
+    if (t === "3g") { return 3 * 1024 * 1024; }
+    return 14 * 1024 * 1024;                                       // wifi / 4g / unknown
+  }
+
+  /* Real transferred bytes from the Resource Timing API when it's usable —
+     it correctly reports 0 for anything served from cache, which the manifest
+     can't know. But transferSize is 0 for CROSS-ORIGIN images unless the host
+     sends Timing-Allow-Origin, and Nekoweb doesn't. Deployed same-origin the
+     API works; opened from disk or another host it silently reports nothing
+     and the budget would never trip. So: trust the API only once it has
+     actually reported something, otherwise fall back to the measured manifest. */
+  function timingBytes() {
+    if (!window.performance || !performance.getEntriesByType) { return 0; }
+    var n = 0;
+    performance.getEntriesByType("resource").forEach(function (e) {
+      if (e.initiatorType === "img" && typeof e.transferSize === "number") { n += e.transferSize; }
+    });
+    return n;
+  }
+  function manifestBytes() {
+    var n = 0;
+    for (var k in cache) { if (cache.hasOwnProperty(k)) { n += (KB[k] || 206) * 1024; } }
+    return n;
+  }
+  function bytesUsed() {
+    var t = timingBytes();
+    return t > 0 ? t : manifestBytes();
+  }
+
+  var cache = {};                    // index -> HTMLImageElement (decoded)
+  var inflight = {};
+  var loading = 0;
+  var MAX_PARALLEL = 4;
+  var queue = [];
+  var idleStarted = false;
+
+  function fetchPanel(i, cb) {
+    if (cache[i]) { if (cb) { cb(cache[i]); } return; }
+    if (inflight[i]) { if (cb) { inflight[i].push(cb); } return; }
+    inflight[i] = cb ? [cb] : [];
+    loading++;
+    var img = new Image();
+    img.decoding = "async";
+    img.alt = "";
+    img.onload = function () {
+      cache[i] = img;
+      var cbs = inflight[i] || []; delete inflight[i];
+      loading--;
+      cbs.forEach(function (f) { f(img); });
+      pump();
+    };
+    img.onerror = function () {
+      var cbs = inflight[i] || []; delete inflight[i];
+      loading--;
+      cbs.forEach(function (f) { f(null); });
+      pump();
+    };
+    img.src = PANELS[i].src;
+  }
+
+  function pump() {
+    while (loading < MAX_PARALLEL && queue.length) {
+      var i = queue.shift();
+      if (cache[i] || inflight[i]) { continue; }
+      fetchPanel(i, null);
+    }
+    if (!queue.length && !idleStarted && loading < MAX_PARALLEL) { warmRest(); }
+  }
+
+  /* Low-priority background warm. Never competes with what's on screen, and
+     stops dead once it has spent its byte budget. Reading always still works
+     past the cap — the window loader keeps fetching what you actually reach.
+     What stops is the speculative part. */
+  var warmStopped = false;
+  function warmRest() {
+    idleStarted = true;
+    var budget = warmBudgetBytes();
+    if (budget <= 0) { warmStopped = true; return; }
+
+    var i = 0;
+    function step() {
+      if (bytesUsed() >= budget) { warmStopped = true; return; }
+      if (loading >= MAX_PARALLEL) { setTimeout(step, 200); return; }
+      while (i < TOTAL && (cache[i] || inflight[i])) { i++; }
+      if (i >= TOTAL) { return; }
+      fetchPanel(i, null);
+      i++;
+      setTimeout(step, 80);
+    }
+    // short books settle fast; long ones let the reader get going first
+    setTimeout(step, TOTAL <= 60 ? 400 : 1500);
+  }
+
+  /* =========================================================
+     STATE + MODE
+     ========================================================= */
+  var body = document.body;
+  var vp = document.getElementById("viewport");
+  var layer = document.getElementById("zoomLayer");
+
+  /* ---------------------------------------------------------
+     Browsers are specified to PAUSE requestAnimationFrame while
+     document.visibilityState === "hidden". A comic opened in a
+     background tab would therefore preload nothing until it is
+     focused — the opposite of what preloading is for, on a site
+     where people routinely open several comics at once.
+     So: rAF when we're visible, a plain timer when we're not.
+     --------------------------------------------------------- */
+  function nextFrame(cb) {
+    if (document.hidden) { return setTimeout(cb, 32); }
+    return requestAnimationFrame(cb);
+  }
+
+  var MODE_KEY = "snadiya:boundborne:mode";
+  var POS_KEY  = "snadiya:boundborne:pos";
+
+  // PRINCIPLE 6 — settings are namespaced PER MODE. Strip settings and
+  // paged settings share nothing. This is the exact failure MangaDex has
+  // been unable to retrofit: one global fit setting across two modes.
+  var S_STRIP_KEY = "snadiya:settings:strip";
+  var S_PAGED_KEY = "snadiya:settings:paged";
+
+  function readJSON(k, dflt) {
+    try { return JSON.parse(localStorage.getItem(k)) || dflt; } catch (e) { return dflt; }
+  }
+  function writeJSON(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ }
+  }
+
+  var stripSettings = readJSON(S_STRIP_KEY, { tapAdvance: false, markers: true });
+  var pagedSettings = readJSON(S_PAGED_KEY, { fit: true, dots: true });
+
+  var state = {
+    mode: "strip",
+    page: 0,          // paged mode current index
+    zoom: 1,
+    nodes: [],
+    chapterOf: [],
+    chromeTimer: null
+  };
+
+  /* =========================================================
+     STRIP BUILD
+     ========================================================= */
+  function buildStrip() {
+    layer.textContent = "";
+    state.nodes = [];
+    CHAPTERS.forEach(function (ch, ci) {
+      if (stripSettings.markers) {
+        var m = document.createElement("div");
+        m.className = "chapmark";
+        m.innerHTML = '<p class="k">' + (ci === 0 ? "Begins" : "Continues") + '</p>' +
+                      '<p class="t">' + ch.title + '</p><hr>';
+        layer.appendChild(m);
+        ch.markEl = m;
+      } else { ch.markEl = null; }
+
+      for (var i = ch.startIndex; i <= ch.endIndex; i++) {
+        var p = PANELS[i];
+        var d = document.createElement("div");
+        d.className = "panel pending";
+        d.setAttribute("data-i", String(i));
+        d.style.aspectRatio = p.w + " / " + p.h;
+        layer.appendChild(d);
+        state.nodes.push(d);
+        state.chapterOf[i] = ci;
+      }
+    });
+    var end = document.createElement("div");
+    end.className = "endcap";
+    end.innerHTML = '<p>End of Chapter 2. Chapter 3 is not out yet.</p><a href="sitemap.html">More comics</a>';
+    layer.appendChild(end);
+  }
+
+  function paintPanel(i) {
+    var node = state.nodes[i];
+    if (!node || !node.classList.contains("pending")) { return; }
+    var img = cache[i];
+    if (!img) { return; }
+    var clone = img.cloneNode();
+    node.textContent = "";
+    node.appendChild(clone);
+    node.classList.remove("pending");
+  }
+
+  function fwdPx()  { return Math.max(2500, vp.clientHeight * 4); }
+  function backPx() { return Math.max(1200, vp.clientHeight * 1.5); }
+
+  function scheduleStrip() {
+    if (!vp.clientHeight || !state.nodes.length || !state.nodes[0].offsetHeight) {
+      nextFrame(scheduleStrip);
+      return;
+    }
+    var scrollY = vp.scrollTop;
+    var bottom = scrollY + vp.clientHeight;
+    var wantFrom = scrollY - backPx();
+    var wantTo = bottom + fwdPx();
+    var visible = [], near = [];
+
+    for (var i = 0; i < state.nodes.length; i++) {
+      var n = state.nodes[i];
+      var y = n.offsetTop, y2 = y + n.offsetHeight;
+      if (cache[i]) { paintPanel(i); continue; }
+      if (y2 < wantFrom || y > wantTo) { continue; }
+      if (y2 >= scrollY && y <= bottom) { visible.push(i); } else { near.push(i); }
+    }
+    visible.concat(near).forEach(function (i) {
+      fetchPanel(i, function () { paintPanel(i); });
+    });
+    queue = [];
+    pump();
+  }
+
+  /* =========================================================
+     PAGED BUILD — chapter strip + progressive-disclosure dots
+     ========================================================= */
+  var chapStrip = document.getElementById("chapStrip");
+  var stage = document.getElementById("stage");
+  var allDots = [];
+
+  function buildChapStrip() {
+    chapStrip.textContent = "";
+    allDots = [];
+    CHAPTERS.forEach(function (ch, ci) {
+      var g = document.createElement("div");
+      g.className = "chapgroup";
+      g.setAttribute("data-c", String(ci));
+
+      var lab = document.createElement("button");
+      lab.className = "chaplabel";
+      lab.type = "button";
+      lab.textContent = ch.title;
+      lab.addEventListener("click", function () { goPage(ch.startIndex); });
+      g.appendChild(lab);
+
+      if (pagedSettings.dots) {
+        var row = document.createElement("div");
+        row.className = "dotrow";
+        row.setAttribute("data-c", String(ci));
+        for (var i = ch.startIndex; i <= ch.endIndex; i++) {
+          (function (idx) {
+            var d = document.createElement("button");
+            d.className = "dot";
+            d.type = "button";
+            d.setAttribute("data-i", String(idx));
+            d.setAttribute("aria-label", "Page " + (idx + 1));
+            d.addEventListener("click", function () { goPage(idx); });
+            row.appendChild(d);
+            allDots[idx] = d;
+          })(i);
+        }
+        g.appendChild(row);
+      }
+      chapStrip.appendChild(g);
+      ch.groupEl = g;
+    });
+  }
+
+  function updateChapStrip() {
+    var ci = PANELS[state.page].chapter;
+    CHAPTERS.forEach(function (ch, i) {
+      if (ch.groupEl) { ch.groupEl.classList.toggle("active", i === ci); }
+    });
+    allDots.forEach(function (d, i) {
+      if (!d) { return; }
+      d.setAttribute("aria-current", i === state.page ? "true" : "false");
+      d.classList.toggle("read", i < state.page);
+    });
+    var lit = allDots[state.page];
+    if (lit && lit.parentNode) {
+      // keep the lit dot in view without moving the page
+      var row = lit.parentNode;
+      var want = lit.offsetLeft - row.clientWidth / 2 + lit.offsetWidth / 2;
+      row.scrollTo({ left: Math.max(0, want), behavior: "smooth" });
+    }
+  }
+
+  function renderPage() {
+    var i = state.page;
+    var p = PANELS[i];
+    stage.textContent = "";
+    stage.classList.add("loading");
+
+    var show = function (img) {
+      if (state.page !== i) { return; }   // user moved on — drop stale result
+      stage.classList.remove("loading");
+      stage.textContent = "";
+      if (!img) {
+        var err = document.createElement("p");
+        err.style.color = "var(--muted)";
+        err.textContent = "This page didn't load. Check your connection and try Next.";
+        stage.appendChild(err);
+        return;
+      }
+      var el = img.cloneNode();
+      el.alt = CHAPTERS[p.chapter].title + ", page " + (i + 1);
+      if (!pagedSettings.fit) {
+        el.style.maxHeight = "none";
+        el.style.width = "100%";
+      }
+      stage.appendChild(el);
+      stage.scrollTop = 0;
+    };
+
+    if (cache[i]) { show(cache[i]); } else { fetchPanel(i, show); }
+
+    // bidirectional neighbours first — readers page backwards constantly
+    [i + 1, i - 1, i + 2, i + 3, i - 2].forEach(function (n) {
+      if (n >= 0 && n < TOTAL && !cache[n]) { fetchPanel(n, null); }
+    });
+
+    document.getElementById("pCounter").textContent = (i + 1) + " / " + TOTAL;
+    document.getElementById("pNum").textContent = (i + 1) + " / " + TOTAL;
+    document.getElementById("pSection").textContent = CHAPTERS[p.chapter].title;
+
+    var atStart = i === 0, atEnd = i === TOTAL - 1;
+    ["pPrev", "pPrev2"].forEach(function (id) { document.getElementById(id).disabled = atStart; });
+    ["pNext", "pNext2"].forEach(function (id) { document.getElementById(id).disabled = atEnd; });
+
+    updateChapStrip();
+    savePos();
+  }
+
+  function goPage(i) {
+    if (i < 0 || i >= TOTAL) { return; }
+    state.page = i;
+    renderPage();
+  }
+  function stepPage(d) {
+    var n = state.page + d;
+    if (n < 0) { toast("You're at the start"); return; }
+    if (n >= TOTAL) { toast("That's the last page"); return; }
+    goPage(n);
+  }
+
+  /* =========================================================
+     MODE SWITCHING — position is preserved across the switch
+     ========================================================= */
+  function currentStripIndex() {
+    var mid = vp.scrollTop + vp.clientHeight * 0.35;
+    var best = 0;
+    for (var i = 0; i < state.nodes.length; i++) {
+      if (state.nodes[i].offsetTop <= mid) { best = i; } else { break; }
+    }
+    return best;
+  }
+
+  function setMode(m, announce) {
+    if (m === state.mode) { return; }
+    var carry;
+    if (state.mode === "strip") { carry = currentStripIndex(); }
+    else { carry = state.page; }
+
+    state.mode = m;
+    body.setAttribute("data-mode", m);
+    try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
+
+    ["segStrip", "segStrip2"].forEach(function (id) {
+      document.getElementById(id).setAttribute("aria-pressed", String(m === "strip"));
+    });
+    ["segPaged", "segPaged2"].forEach(function (id) {
+      document.getElementById(id).setAttribute("aria-pressed", String(m === "paged"));
+    });
+
+    if (m === "paged") {
+      state.page = carry;
+      renderPage();
+      if (announce) { toast("Pages — " + (carry + 1) + " / " + TOTAL); }
+    } else {
+      // The strip was display:none, so every offsetTop reads 0 until layout
+      // is recomputed. Force a synchronous reflow before restoring position —
+      // deferring to rAF here silently lands the reader back at page one.
+      void vp.offsetHeight;
+      var node = state.nodes[carry];
+      if (node && node.offsetTop) { vp.scrollTop = node.offsetTop; }
+      updateProgress();
+      scheduleStrip();
+      placeChapTicks();
+      showChrome(true);
+
+      // second pass once images settle, in case heights shifted
+      nextFrame(function () {
+        var n2 = state.nodes[carry];
+        if (n2 && Math.abs(vp.scrollTop - n2.offsetTop) > 4) { vp.scrollTop = n2.offsetTop; }
+        placeChapTicks(); updateProgress();
+      });
+      if (announce) { toast("Strip"); }
+    }
+  }
+
+  ["segStrip", "segStrip2"].forEach(function (id) {
+    document.getElementById(id).addEventListener("click", function (e) {
+      e.stopPropagation(); setMode("strip", true);
+    });
+  });
+  ["segPaged", "segPaged2"].forEach(function (id) {
+    document.getElementById(id).addEventListener("click", function (e) {
+      e.stopPropagation(); setMode("paged", true);
+    });
+  });
+
+  /* =========================================================
+     STRIP PROGRESS
+     ========================================================= */
+  var pctEl = document.getElementById("pct");
+  var fill = document.getElementById("scrubFill");
+  var knob = document.getElementById("scrubKnob");
+  var chapNow = document.getElementById("chapNow");
+  var scrubWrap = document.getElementById("scrubWrap");
+
+  function maxScroll() { return Math.max(1, vp.scrollHeight - vp.clientHeight); }
+
+  function updateProgress() {
+    var p = vp.scrollTop / maxScroll();
+    var pc = Math.round(p * 100);
+    pctEl.textContent = pc + "%";
+    fill.style.width = (p * 100) + "%";
+    knob.style.left = (p * 100) + "%";
+    scrubWrap.setAttribute("aria-valuenow", String(pc));
+    var ci = PANELS[currentStripIndex()].chapter;
+    if (chapNow.textContent !== CHAPTERS[ci].title) { chapNow.textContent = CHAPTERS[ci].title; }
+  }
+
+  function placeChapTicks() {
+    var track = document.getElementById("scrubTrack");
+    track.querySelectorAll(".chaptick").forEach(function (t) { t.remove(); });
+    var ms = maxScroll();
+    CHAPTERS.forEach(function (ch, ci) {
+      if (ci === 0) { return; }
+      var node = state.nodes[ch.startIndex];
+      if (!node) { return; }
+      var t = document.createElement("div");
+      t.className = "chaptick";
+      t.style.left = Math.min(100, (node.offsetTop / ms) * 100) + "%";
+      track.appendChild(t);
+    });
+  }
+
+  var ticking = false;
+  function onScrollFrame() {
+    updateProgress(); scheduleStrip(); savePos(); ticking = false;
+  }
+  vp.addEventListener("scroll", function () {
+    if (ticking) { return; }
+    ticking = true;
+    setTimeout(function () { ticking = false; }, 250);
+    nextFrame(onScrollFrame);
+  }, { passive: true });
+
+  /* =========================================================
+     STRIP CHROME + TAP
+     ========================================================= */
+  function showChrome(on) {
+    body.classList.toggle("chrome-on", on);
+    clearTimeout(state.chromeTimer);
+    if (on) {
+      state.chromeTimer = setTimeout(function () {
+        if (!document.getElementById("menu").classList.contains("open")) {
+          body.classList.remove("chrome-on");
+        }
+      }, 3000);
+    }
+  }
+
+  var downY = 0, downX = 0, downT = 0, moved = false, wasScrolling = false;
+  vp.addEventListener("pointerdown", function (e) { downY = e.clientY; downX = e.clientX; downT = Date.now(); moved = false; });
+  vp.addEventListener("pointermove", function (e) {
+    if (Math.abs(e.clientY - downY) > 8 || Math.abs(e.clientX - downX) > 8) { moved = true; }
+  });
+  vp.addEventListener("scroll", function () {
+    wasScrolling = true;
+    clearTimeout(window.__ss);
+    window.__ss = setTimeout(function () { wasScrolling = false; }, 90);
+  }, { passive: true });
+
+  vp.addEventListener("click", function () {
+    // a tap that ARRESTS momentum scroll must be swallowed
+    if (moved || wasScrolling || Date.now() - downT > 400) { return; }
+    if (stripSettings.tapAdvance && !body.classList.contains("chrome-on")) { advance(1); return; }
+    showChrome(!body.classList.contains("chrome-on"));
+  });
+
+  function advance(dir) {
+    vp.scrollBy({ top: dir * vp.clientHeight * 0.75, behavior: "smooth" });
+  }
+
+  /* =========================================================
+     ZOOM (strip only) — transform layer, no width/height clamp
+     ========================================================= */
+  function applyZoom() {
+    layer.style.transform = "translateX(0px) scale(" + state.zoom + ")";
+    layer.style.width = (100 / state.zoom) + "%";
+  }
+  function setZoom(z, anchorY) {
+    var prev = state.zoom;
+    z = Math.max(1, Math.min(4, z));
+    if (z === prev) { return; }
+    var a = (anchorY == null ? vp.clientHeight / 2 : anchorY);
+    var before = vp.scrollTop + a;
+    state.zoom = z;
+    applyZoom();
+    vp.scrollTop = before * (z / prev) - a;
+    toast(z === 1 ? "Zoom reset" : "Zoom " + z.toFixed(1) + "×");
+    scheduleStrip();
+  }
+  vp.addEventListener("wheel", function (e) {
+    if (!e.ctrlKey) { return; }
+    e.preventDefault();
+    setZoom(state.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientY);
+  }, { passive: false });
+
+  var lastTap = 0;
+  vp.addEventListener("click", function (e) {
+    var now = Date.now();
+    if (now - lastTap < 300 && !moved) { setZoom(state.zoom > 1 ? 1 : 2, e.clientY); }
+    lastTap = now;
+  });
+
+  var pts = new Map(), startDist = 0, startZoom = 1;
+  vp.addEventListener("pointerdown", function (e) { pts.set(e.pointerId, e); });
+  vp.addEventListener("pointerup", function (e) { pts.delete(e.pointerId); startDist = 0; });
+  vp.addEventListener("pointercancel", function (e) { pts.delete(e.pointerId); startDist = 0; });
+  vp.addEventListener("pointermove", function (e) {
+    if (!pts.has(e.pointerId)) { return; }
+    pts.set(e.pointerId, e);
+    if (pts.size !== 2) { return; }
+    var a = Array.from(pts.values());
+    var d = Math.hypot(a[0].clientX - a[1].clientX, a[0].clientY - a[1].clientY);
+    if (!startDist) { startDist = d; startZoom = state.zoom; return; }
+    setZoom(startZoom * (d / startDist), (a[0].clientY + a[1].clientY) / 2);
+  });
+
+  /* =========================================================
+     KEYBOARD — bindings differ per mode, deliberately
+     ========================================================= */
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) { return; }
+    var paged = state.mode === "paged";
+
+    if (e.key === "v") { setMode(paged ? "strip" : "paged", true); e.preventDefault(); return; }
+
+    if (paged) {
+      switch (e.key) {
+        case "ArrowRight": case "ArrowDown": case " ":
+          e.preventDefault(); stepPage(1); break;
+        case "ArrowLeft": case "ArrowUp":
+          e.preventDefault(); stepPage(-1); break;
+        case "Home": e.preventDefault(); goPage(0); break;
+        case "End":  e.preventDefault(); goPage(TOTAL - 1); break;
+        case "Escape": closeMenus(); break;
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case " ": e.preventDefault(); advance(e.shiftKey ? -1 : 1); break;
+      case "ArrowDown": e.preventDefault(); advance(1); break;
+      case "ArrowUp": e.preventDefault(); advance(-1); break;
+      case "ArrowRight": e.preventDefault(); jumpChapter(1); break;
+      case "ArrowLeft": e.preventDefault(); jumpChapter(-1); break;
+      case "m": showChrome(!body.classList.contains("chrome-on")); break;
+      case "Home": e.preventDefault(); vp.scrollTo({ top: 0, behavior: "smooth" }); break;
+      case "End": e.preventDefault(); vp.scrollTo({ top: maxScroll(), behavior: "smooth" }); break;
+      case "Escape":
+        if (document.getElementById("menu").classList.contains("open")) { closeMenus(); }
+        else { body.classList.remove("chrome-on"); }
+        break;
+    }
+  });
+
+  /* =========================================================
+     CHAPTER JUMP (strip)
+     ========================================================= */
+  function scrollToChapter(ci) {
+    var ch = CHAPTERS[ci];
+    var target = ch.markEl || state.nodes[ch.startIndex];
+    if (!target) { return; }
+    vp.scrollTo({ top: target.offsetTop, behavior: "smooth" });
+    toast(ch.title);
+  }
+  function jumpChapter(dir) {
+    var ci = PANELS[currentStripIndex()].chapter;
+    var next = ci + dir;
+    if (next < 0 || next >= CHAPTERS.length) {
+      toast(dir > 0 ? "That's the last chapter" : "You're at the start");
+      return;
+    }
+    scrollToChapter(next);
+  }
+  document.getElementById("btnNextChap").addEventListener("click", function (e) { e.stopPropagation(); jumpChapter(1); });
+  document.getElementById("btnPrevChap").addEventListener("click", function (e) { e.stopPropagation(); jumpChapter(-1); });
+
+  /* =========================================================
+     SCRUBBER
+     ========================================================= */
+  function scrubTo(clientX) {
+    var r = document.getElementById("scrubTrack").getBoundingClientRect();
+    var p = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    vp.scrollTop = p * maxScroll();
+    updateProgress(); scheduleStrip();
+  }
+  var scrubbing = false;
+  scrubWrap.addEventListener("pointerdown", function (e) {
+    e.stopPropagation(); scrubbing = true;
+    scrubWrap.setPointerCapture(e.pointerId);
+    scrubTo(e.clientX); clearTimeout(state.chromeTimer);
+  });
+  scrubWrap.addEventListener("pointermove", function (e) { if (scrubbing) { scrubTo(e.clientX); } });
+  scrubWrap.addEventListener("pointerup", function (e) { scrubbing = false; e.stopPropagation(); showChrome(true); });
+  scrubWrap.addEventListener("click", function (e) { e.stopPropagation(); });
+  scrubWrap.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault(); e.stopPropagation();
+      vp.scrollTop += (e.key === "ArrowRight" ? 1 : -1) * maxScroll() * 0.02;
+      updateProgress();
+    }
+  });
+
+  /* =========================================================
+     MENUS — absolute, never displace content
+     ========================================================= */
+  function closeMenus() {
+    ["menu", "pMenu"].forEach(function (id) { document.getElementById(id).classList.remove("open"); });
+    ["btnMenu", "pBtnMenu"].forEach(function (id) { document.getElementById(id).setAttribute("aria-expanded", "false"); });
+  }
+  function wireMenu(btnId, menuId) {
+    var b = document.getElementById(btnId), m = document.getElementById(menuId);
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = !m.classList.contains("open");
+      closeMenus();
+      m.classList.toggle("open", open);
+      b.setAttribute("aria-expanded", String(open));
+      clearTimeout(state.chromeTimer);
+    });
+    m.addEventListener("click", function (e) { e.stopPropagation(); });
+  }
+  wireMenu("btnMenu", "menu");
+  wireMenu("pBtnMenu", "pMenu");
+  document.getElementById("topbar").addEventListener("click", function (e) { e.stopPropagation(); });
+  document.getElementById("botbar").addEventListener("click", function (e) { e.stopPropagation(); });
+  document.getElementById("pagedTop").addEventListener("click", function (e) { e.stopPropagation(); });
+  document.addEventListener("click", closeMenus);
+
+  document.querySelectorAll("[data-jump]").forEach(function (b) {
+    b.addEventListener("click", function () { scrollToChapter(+b.getAttribute("data-jump")); closeMenus(); });
+  });
+  document.querySelectorAll("[data-pjump]").forEach(function (b) {
+    b.addEventListener("click", function () { goPage(CHAPTERS[+b.getAttribute("data-pjump")].startIndex); closeMenus(); });
+  });
+
+  /* =========================================================
+     PER-MODE SETTINGS
+     ========================================================= */
+  var mTap = document.getElementById("mTap");
+  var mMark = document.getElementById("mMark");
+  mTap.setAttribute("aria-pressed", String(stripSettings.tapAdvance));
+  mMark.setAttribute("aria-pressed", String(stripSettings.markers));
+
+  mTap.addEventListener("click", function () {
+    stripSettings.tapAdvance = !stripSettings.tapAdvance;
+    mTap.setAttribute("aria-pressed", String(stripSettings.tapAdvance));
+    toast(stripSettings.tapAdvance ? "Tap advances ¾ screen" : "Tap shows controls only");
+    writeJSON(S_STRIP_KEY, stripSettings);
+  });
+  mMark.addEventListener("click", function () {
+    stripSettings.markers = !stripSettings.markers;
+    mMark.setAttribute("aria-pressed", String(stripSettings.markers));
+    var keep = currentStripIndex();
+    buildStrip();
+    nextFrame(function () {
+      var n = state.nodes[keep];
+      if (n) { vp.scrollTop = n.offsetTop; }
+      scheduleStrip(); placeChapTicks(); updateProgress();
+    });
+    toast(stripSettings.markers ? "Chapter markers on" : "Seamless — no markers");
+    writeJSON(S_STRIP_KEY, stripSettings);
+  });
+  document.getElementById("mFit").addEventListener("click", function () { setZoom(1); });
+  document.getElementById("mZones").addEventListener("click", function () { closeMenus(); flashZones(true); });
+
+  var pFit = document.getElementById("pFit");
+  var pDots = document.getElementById("pDots");
+  pFit.setAttribute("aria-pressed", String(pagedSettings.fit));
+  pDots.setAttribute("aria-pressed", String(pagedSettings.dots));
+
+  pFit.addEventListener("click", function () {
+    pagedSettings.fit = !pagedSettings.fit;
+    pFit.setAttribute("aria-pressed", String(pagedSettings.fit));
+    toast(pagedSettings.fit ? "Fit to screen" : "Full width");
+    writeJSON(S_PAGED_KEY, pagedSettings);
+    renderPage();
+  });
+  pDots.addEventListener("click", function () {
+    pagedSettings.dots = !pagedSettings.dots;
+    pDots.setAttribute("aria-pressed", String(pagedSettings.dots));
+    toast(pagedSettings.dots ? "Page dots on" : "Chapter labels only");
+    writeJSON(S_PAGED_KEY, pagedSettings);
+    buildChapStrip(); updateChapStrip();
+  });
+
+  ["pPrev", "pPrev2"].forEach(function (id) {
+    document.getElementById(id).addEventListener("click", function (e) { e.stopPropagation(); stepPage(-1); });
+  });
+  ["pNext", "pNext2"].forEach(function (id) {
+    document.getElementById(id).addEventListener("click", function (e) { e.stopPropagation(); stepPage(1); });
+  });
+
+  /* =========================================================
+     TOAST / FLASH / RESUME
+     ========================================================= */
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove("show"); }, 1500);
+  }
+
+  var flashEl = document.getElementById("flash");
+  function flashZones(manual) {
+    if (state.mode !== "strip") { return; }
+    flashEl.classList.add("show");
+    setTimeout(function () { flashEl.classList.remove("show"); }, manual ? 1600 : 900);
+  }
+
+  var saveT;
+  function savePos() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () {
+      var idx = state.mode === "paged" ? state.page : currentStripIndex();
+      writeJSON(POS_KEY, { index: idx, mode: state.mode });
+    }, 400);
+  }
+
+  function offerResume() {
+    var s = readJSON(POS_KEY, null);
+    if (!s || !s.index || s.index < 2) { return; }
+    var box = document.getElementById("resume");
+    box.querySelector("p").innerHTML =
+      'You left off on page <b>' + (s.index + 1) + '</b> of ' + TOTAL +
+      ', in ' + CHAPTERS[PANELS[s.index].chapter].title + '.';
+    box.classList.add("show");
+
+    document.getElementById("btnResume").addEventListener("click", function (e) {
+      e.stopPropagation();
+      box.classList.remove("show");
+      if (state.mode === "paged") { goPage(s.index); }
+      else {
+        var n = state.nodes[s.index];
+        if (n) { vp.scrollTop = n.offsetTop; }
+        updateProgress(); scheduleStrip();
+      }
+    });
+    document.getElementById("btnDismissResume").addEventListener("click", function (e) {
+      e.stopPropagation();
+      box.classList.remove("show");
+      try { localStorage.removeItem(POS_KEY); } catch (err) {}
+    });
+    setTimeout(function () { box.classList.remove("show"); }, 9000);
+  }
+  document.getElementById("resume").addEventListener("click", function (e) { e.stopPropagation(); });
+
+  /* =========================================================
+     BOOT
+     ========================================================= */
+  buildStrip();
+  buildChapStrip();
+  applyZoom();
+
+  var savedMode = null;
+  try { savedMode = localStorage.getItem(MODE_KEY); } catch (e) {}
+  if (savedMode === "paged") {
+    state.mode = "strip";          // force a real transition
+    setMode("paged", false);
+  } else {
+    body.setAttribute("data-mode", "strip");
+  }
+
+  nextFrame(function () {
+    if (state.mode === "strip") {
+      placeChapTicks(); updateProgress(); scheduleStrip();
+      showChrome(true); flashZones(false);
+    }
+    offerResume();
+  });
+
+  // Coming back into view after being hidden: re-measure and top up. While
+  // hidden the timer path keeps loading, but layout can be stale, so this
+  // corrects ticks and progress the moment the reader actually looks.
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { return; }
+    if (state.mode === "strip") {
+      placeChapTicks(); updateProgress(); scheduleStrip();
+    } else {
+      updateChapStrip();
+    }
+  });
+
+  window.addEventListener("resize", function () {
+    clearTimeout(window.__rz);
+    window.__rz = setTimeout(function () {
+      if (state.mode === "strip") { placeChapTicks(); updateProgress(); scheduleStrip(); }
+      else { updateChapStrip(); }
+    }, 160);
+  });
+
+  window.__reader = {
+    state: state, chapters: CHAPTERS, panels: PANELS, total: TOTAL,
+    cache: cache, setMode: setMode, goPage: goPage, stepPage: stepPage,
+    schedule: scheduleStrip, tick: onScrollFrame, setZoom: setZoom,
+    settings: { strip: stripSettings, paged: pagedSettings },
+    probe: function () {
+      return {
+        cached: Object.keys(cache).length, loading: loading, queued: queue.length,
+        bytesUsedMB: +(bytesUsed() / 1048576).toFixed(2),
+        budgetMB: +(warmBudgetBytes() / 1048576).toFixed(2),
+        warmStopped: warmStopped,
+        effectiveType: conn ? conn.effectiveType : "unknown",
+        saveData: conn ? !!conn.saveData : false
+      };
+    }
+  };
+})();
+</script>
+</body>
+</html>
