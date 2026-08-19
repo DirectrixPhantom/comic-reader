@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jessica &amp; Judy's Peril</title>
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Jessica &amp; Judy's Peril">
+<meta property="og:site_name" content="mira-96">
+<meta property="og:image" content="https://mira-96.nekoweb.org/banner_jjp.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://mira-96.nekoweb.org/jjp.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1e1b2c">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#1e1b2c;
+    --bar:#12100e;
+    --strip:#16130f;
+    --line:#5a356a;
+    --amber:#f49c58;
+    --amber-dk:#1a1408;
+    --muted:#6b6257;
+    --text:#ecc1c2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Archivo', system-ui, sans-serif;
+    font-size:16px;
+  }
+
+  /* ═══ Top bar ═══ */
+  #topbar { position:fixed; top:0; left:0; right:0; z-index:100; }
+
+  #bar1 {
+    background:var(--bar); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:16px;
+    padding:10px 20px; min-height:56px;
+  }
+  #author {
+    flex:1; display:flex; justify-content:flex-start;
+  }
+  #author a {
+    color:var(--muted); text-decoration:none;
+    font-size:16px; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; white-space:nowrap;
+    transition:color 0.15s;
+  }
+  #author a:hover { color:var(--amber); }
+
+  #pager { display:flex; align-items:center; gap:14px; }
+  #counter { font-size:16px; color:var(--muted); white-space:nowrap; }
+  #counter b { color:var(--text); font-weight:700; }
+
+  .pbtn {
+    height:36px; min-width:96px; padding:0 16px;
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    background:none; border:1px solid var(--line); border-radius:5px;
+    color:var(--muted); font-family:inherit; font-size:16px; font-weight:700;
+    cursor:pointer; text-decoration:none;
+    transition:color 0.15s, border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .pbtn:hover { color:var(--text); border-color:#5a356a; }
+  .pbtn:disabled { opacity:0.3; cursor:default; }
+  .pbtn.primary {
+    background:var(--amber); border-color:var(--amber); color:var(--amber-dk);
+  }
+  .pbtn.primary:hover { background:#f49c58; border-color:#f49c58; color:var(--amber-dk); }
+  .pbtn.primary:disabled { opacity:0.3; }
+
+  #tools { flex:1; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
+  .tbtn {
+    height:34px; padding:0 14px;
+    display:inline-flex; align-items:center; gap:8px;
+    background:none; border:1px solid var(--line); border-radius:5px;
+    color:var(--muted); font-family:inherit; font-size:16px; font-weight:600;
+    cursor:pointer; text-decoration:none; white-space:nowrap;
+    transition:color 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tbtn:hover, .tbtn.open { color:var(--text); border-color:#5a356a; }
+
+  #jump {
+    height:36px; padding:0 12px;
+    background:none; border:1px solid var(--line); border-radius:5px;
+    color:var(--muted); font-family:inherit; font-size:16px; font-weight:700;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  #jump:hover { color:var(--text); border-color:#5a356a; }
+
+  /* ═══ Chapter strip ═══ */
+  #strip {
+    background:var(--strip); border-bottom:1px solid var(--line);
+    display:flex; align-items:stretch;
+    padding:0 20px;
+  }
+  .chap {
+    flex:0 0 auto; display:flex; align-items:center; gap:12px;
+    background:none; border:none; cursor:pointer;
+    font-family:inherit; font-size:16px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase;
+    color:#696167; padding:9px 14px 9px 0;
+    transition:color 0.15s; white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chap:hover { color:var(--text); }
+  .chap.on { color:var(--amber); flex:1 1 auto; }
+  .chap.link { text-decoration:none; }
+
+  /* progressive disclosure: only the active chapter shows its dots */
+  .chap-dots {
+    display:none; align-items:center; gap:4px;
+    height:16px; overflow-x:auto; overflow-y:hidden;
+    scrollbar-width:none; flex:1 1 auto; min-width:0;
+  }
+  .chap-dots::-webkit-scrollbar { display:none; }
+  .chap.on .chap-dots { display:flex; }
+  .cdot {
+    width:7px; height:7px; border-radius:50%; flex:0 0 auto;
+    background:#3a332a; border:none; cursor:pointer;
+    padding:7px; box-sizing:content-box; margin:-7px;
+    background-clip:content-box;
+    transition:background 0.12s, transform 0.12s;
+  }
+  .cdot:hover { background:#8a7b62; transform:scale(1.35); }
+  .cdot.active { background:var(--amber); transform:scale(1.35); }
+
+  /* ═══ Menu dropdown ═══ */
+  #menu-wrap { position:relative; }
+  #menu-panel {
+    position:absolute; top:calc(100% + 8px); right:0;
+    z-index:150; display:none; flex-direction:column; gap:2px;
+    min-width:200px; padding:8px;
+    background:#14120f; border:1px solid #393047; border-radius:7px;
+    box-shadow:0 14px 36px rgba(0,0,0,0.8);
+  }
+  #menu-panel.open { display:flex; }
+  .menu-head {
+    font-size:16px; font-weight:900; color:#696167;
+    letter-spacing:1px; padding:8px 8px 4px;
+  }
+  .mbtn {
+    display:flex; align-items:center; width:100%; height:36px;
+    padding:0 10px; border-radius:4px;
+    background:none; border:none; color:#b8ac9c;
+    font-family:inherit; font-size:16px; font-weight:600;
+    text-decoration:none; text-align:left; cursor:pointer;
+    transition:background 0.12s, color 0.12s;
+  }
+  .mbtn:hover { background:#221d16; color:#fff; }
+  .menu-sep { height:1px; background:#393047; margin:6px 4px; }
+
+  /* ═══ Reader ═══ */
+  #reader { padding-top:104px; }
+  .slide {
+    display:none; justify-content:center; align-items:flex-start;
+    padding:26px 20px 8px;
+  }
+  .slide.active { display:flex; }
+  .slide img {
+    max-width:100%; max-height:calc(100vh - 260px);
+    width:auto; height:auto; object-fit:contain; display:block;
+  }
+
+  /* ═══ Bottom pager ═══ */
+  #footer {
+    max-width:1100px; margin:0 auto;
+    padding:22px 20px 54px;
+    display:flex; align-items:center; gap:20px;
+  }
+  #fcenter { flex:1; min-width:0; }
+  #footer-nav { display:flex; align-items:center; gap:12px; flex:0 0 auto; }
+  .fbtn {
+    height:44px; min-width:0; padding:0 20px;
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    background:none; border:1px solid var(--line); border-radius:5px;
+    color:var(--muted); font-family:inherit; font-size:17px; font-weight:700;
+    cursor:pointer; text-decoration:none;
+    transition:color 0.15s, border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .fbtn:hover { color:var(--text); border-color:#5a356a; }
+  .fbtn:disabled { opacity:0.3; cursor:default; }
+  .fbtn.primary { background:var(--amber); border-color:var(--amber); color:var(--amber-dk); }
+  .fbtn.primary:hover { background:#f49c58; border-color:#f49c58; }
+  .fbtn.primary:disabled { opacity:0.3; }
+
+  #fcenter { text-align:left; }
+  #fchap {
+    font-size:16px; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; color:var(--muted); margin-bottom:5px;
+  }
+  #fcount { font-size:17px; color:var(--muted); }
+  #fcount b { color:var(--amber); font-weight:700; }
+
+  #hint {
+    text-align:center; font-size:16px; color:#696167;
+    padding-bottom:30px;
+  }
+
+  @media (max-width:860px) {
+    #bar1 { flex-wrap:wrap; gap:10px; }
+    #author, #tools { flex:0 0 auto; }
+    #pager { order:3; width:100%; justify-content:center; }
+    #strip { overflow-x:auto; padding:0 12px; }
+    .chap { flex:0 0 auto; padding:9px 14px; }
+    #reader { padding-top:132px; }
+    .slide img { max-height:calc(100vh - 300px); }
+    .fbtn { min-width:0; padding:0 16px; font-size:16px; }
+    #footer { gap:10px; padding:18px 12px 40px; }
+  }
+</style>
+</head>
+<body><a href="https://mira-96.nekoweb.org/cdn-cgi/content?id=KlWEDtvVuMtllNjVnRyCv36_4TtIIIxVuRuPc8EjQCU-1787116769.0083299-1.2.1.1-T9AVYXgy2XEwDZirdl.FuF6NQvynoaDwCR4Rv_CmJbsoBm3DkCI6ciOmsq4jeFsj" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a><a href="https://mira-96.nekoweb.org/cdn-cgi/content?id=zL0HMOHVMDpUQ5KQJekmF44bfdAF7ZInZIhd0hu5rzo-1784616783.5905097-1.2.1.1-_7AoUjTzIESTbOeY4qySKPra1Igpvt9_sOMJ9cbRGDg" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a><div id="topbar">
+  <div id="bar1">
+    <div id="author">
+      <a href="https://subscribestar.adult/snadiya" target="_blank" rel="noopener">by Snadiya</a>
+    </div>
+    <div id="pager">
+      <button class="pbtn" id="prev" onclick="go(-1)">&#8249; Prev</button>
+      <span id="counter"></span>
+      <select id="jump" onchange="show(parseInt(this.value,10))"></select>
+      <button class="pbtn primary" id="next" onclick="go(1)">Next &#8250;</button>
+    </div>
+    <div id="tools">
+      <a class="tbtn" href="index.html">&#8592; All comics</a>
+      <div id="menu-wrap">
+        <button class="tbtn" id="menu-btn" aria-haspopup="true" aria-expanded="false" onclick="toggleMenu(event)">
+          &#9776; Menu
+        </button>
+        <div id="menu-panel" role="menu">
+          <span class="menu-head">BoundBorne series</span>
+          <a class="mbtn" role="menuitem" href="boundborne.html">BoundBorne</a>
+          <a class="mbtn" role="menuitem" href="pack01.html">Bonus Pack</a>
+          <a class="mbtn" role="menuitem" href="extra01.html">Extra Pack 01</a>
+          <a class="mbtn" role="menuitem" href="pack00.html">Pack 00: Character Concepts</a>
+          <a class="mbtn" role="menuitem" href="gag.html">J&amp;J Gagging</a>
+          <div class="menu-sep"></div>
+          <span class="menu-head">All comics</span>
+          <a class="mbtn" role="menuitem" href="boundborne.html">BoundBorne</a>
+          <a class="mbtn" role="menuitem" href="pantied.html">PanTied</a>
+          <a class="mbtn" role="menuitem" href="disgust.html">Disgusting Requests</a>
+          <a class="mbtn" role="menuitem" href="corridor.html">Corridor</a>
+          <a class="mbtn" role="menuitem" href="traveler.html">Packaged Traveler</a>
+          <a class="mbtn" role="menuitem" href="pack1.html">Pack 01</a>
+          <a class="mbtn" role="menuitem" href="program.html">Program</a>
+          <a class="mbtn" role="menuitem" href="pack01.html">BoundBorne Bonus Pack</a>
+          <div class="menu-sep"></div>
+          <a class="mbtn" role="menuitem" href="index.html">All comics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="strip">
+    <button class="chap on">
+      <span>J&amp;J Preview</span>
+      <span class="chap-dots" id="dots"></span>
+    </button>
+  </div>
+</div>
+
+<div id="reader"></div>
+
+<div id="footer">
+  <div id="fcenter">
+    <div id="fchap">J&amp;J Preview</div>
+    <div id="fcount"></div>
+  </div>
+  <div id="footer-nav">
+    <button class="fbtn" id="fprev" onclick="go(-1)">&#8249; Prev</button>
+    <button class="fbtn primary" id="fnext" onclick="go(1)">Next &#8250;</button>
+  </div>
+</div>
+</div>
+
+<div id="hint">&larr; &rarr; arrow keys to navigate</div>
+
+<script>
+  const PANELS = ["jjp/p_000.webp", "jjp/p_001.webp", "jjp/p_002.webp", "jjp/p_003.webp", "jjp/p_004.webp", "jjp/p_005.webp", "jjp/p_006.webp", "jjp/p_007.webp", "jjp/p_008.webp", "jjp/p_009.webp", "jjp/p_010.webp", "jjp/p_011.webp", "jjp/p_012.webp", "jjp/p_013.webp", "jjp/p_014.webp", "jjp/p_015.webp", "jjp/p_016.webp", "jjp/p_017.webp", "jjp/p_018.webp", "jjp/p_019.webp", "jjp/p_020.webp", "jjp/p_021.webp", "jjp/p_022.webp", "jjp/p_023.webp"];
+  const TOTAL = PANELS.length;
+  let cur = 0;
+
+  const reader = document.getElementById('reader');
+  const dotbox = document.getElementById('dots');
+  const dots = [];
+
+  PANELS.forEach((src, i) => {
+    const d = document.createElement('div');
+    d.className = 'slide' + (i === 0 ? ' active' : '');
+    d.id = 's' + i;
+    d.innerHTML = '<img src="' + src + '"' + (i < 2 ? '' : ' loading="lazy"') +
+                  ' alt="Page ' + (i + 1) + '">';
+    reader.appendChild(d);
+
+    const dot = document.createElement('span');
+    dot.className = 'cdot' + (i === 0 ? ' active' : '');
+    dot.title = 'Page ' + (i + 1);
+    dot.onclick = ev => { ev.stopPropagation(); show(i); };
+    dotbox.appendChild(dot);
+    dots.push(dot);
+  });
+
+  const jumpSel = document.getElementById('jump');
+  PANELS.forEach((_, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = 'Page ' + (i + 1);
+    jumpSel.appendChild(o);
+  });
+
+  function show(n) {
+    if (n < 0 || n >= TOTAL) return;
+    document.getElementById('s' + cur).classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur = n;
+    document.getElementById('s' + cur).classList.add('active');
+    dots[cur].classList.add('active');
+    jumpSel.value = cur;
+    dots[cur].scrollIntoView({ block:'nearest', inline:'center' });
+
+    const label = '<b>' + (cur + 1) + '</b> / ' + TOTAL;
+    document.getElementById('counter').innerHTML = label;
+    document.getElementById('fcount').innerHTML = label;
+
+    const atStart = (cur === 0), atEnd = (cur === TOTAL - 1);
+    document.getElementById('prev').disabled  = atStart;
+    document.getElementById('fprev').disabled = atStart;
+    document.getElementById('next').disabled  = atEnd;
+    document.getElementById('fnext').disabled = atEnd;
+    window.scrollTo(0, 0);
+  }
+  function go(d) { show(Math.max(0, Math.min(TOTAL - 1, cur + d))); }
+
+  const menuBtn = document.getElementById('menu-btn');
+  const menuPanel = document.getElementById('menu-panel');
+  function setMenu(open) {
+    menuPanel.classList.toggle('open', open);
+    menuBtn.classList.toggle('open', open);
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggleMenu(e) { e.stopPropagation(); setMenu(!menuPanel.classList.contains('open')); }
+  document.addEventListener('click', e => {
+    if (!document.getElementById('menu-wrap').contains(e.target)) setMenu(false);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { setMenu(false); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  });
+
+  show(0);
+</script>
+</body>
+</html>
