@@ -648,9 +648,10 @@ window.CONFIG = { title:"Extra Pack 01", artist:"Snadiya", artistSite:"https://l
     killPanzoom();
     if(!window.Panzoom){ im.style.transform="scale("+stageZoom+")"; return; }
     pz=window.Panzoom(im,{maxScale:6,minScale:1,startScale:stageZoom,step:0.25,
-      panOnlyWhenZoomed:true,cursor:"auto",animate:true,duration:120,
+      panOnlyWhenZoomed:true,cursor:"auto",animate:true,duration:120,overflow:"auto",
       handleStartEvent:function(e){ if(pz&&pz.getScale()>1.01){ e.preventDefault(); e.stopPropagation(); } }});
     im.addEventListener("panzoomchange",function(e){ stageZoom=e.detail.scale; syncZoomCursor(); });
+    pz.reset({animate:false});
   }
   function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor=stageZoom>1.01?"grab":"auto"; } }
   function setStageZoom(z){ if(onCard){return;}

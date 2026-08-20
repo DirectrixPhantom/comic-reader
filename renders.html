@@ -1403,9 +1403,10 @@ window.CONFIG = {
       contain:"outside", panOnlyWhenZoomed:true, cursor:"auto", animate:true, duration:120,
       /* only swallow pointer events once actually zoomed, so tap-to-advance and
          swipe keep working at 1x */
-      handleStartEvent:function(e){ if(pz&&pz.getScale()>1.01){ e.preventDefault(); e.stopPropagation(); } }
+      overflow:"auto",handleStartEvent:function(e){ if(pz&&pz.getScale()>1.01){ e.preventDefault(); e.stopPropagation(); } }
     });
     im.addEventListener("panzoomchange",function(e){ stageZoom=e.detail.scale; syncZoomCursor(); });
+    pz.reset({animate:false});
   }
   function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor = stageZoom>1.01?"grab":"auto"; } }
   function setStageZoom(z){ if(onCard){return;}
