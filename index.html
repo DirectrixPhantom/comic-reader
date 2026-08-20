@@ -17,7 +17,9 @@
   html,body{margin:0;background:var(--ink);color:var(--text);font-family:var(--font)}
   .wrap{max-width:940px;margin:0 auto;padding:48px 20px 72px}
   h1{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+    h2{font-size:20px;font-weight:700;margin:34px 0 12px;color:var(--text)}
+  h2:first-of-type{margin-top:8px}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .card{display:flex;flex-direction:column;gap:6px;padding:16px 18px;background:var(--surface);
     border:1px solid var(--sep);border-radius:10px;text-decoration:none;color:var(--text);
     transition:border-color .15s,background .15s}
@@ -31,6 +33,60 @@
 <body>
   <div class="wrap">
     <h1>Comics</h1>
+    <h2>Boundborne</h2>
+    <div class="grid">
+      <a class="card" href="boundborne.html">
+        <span class="name">BoundBorne</span>
+        <span class="meta">213 panels 4 chapters</span>
+      </a>
+      <a class="card" href="pack01.html">
+        <span class="name">BoundBorne Bonus Pack</span>
+        <span class="meta">11 panels</span>
+      </a>
+      <a class="card" href="pack00.html">
+        <span class="name">Pack 00: Character Concepts</span>
+        <span class="meta">6 panels</span>
+      </a>
+      <a class="card" href="gag.html">
+        <span class="name">J&amp;J Gagging</span>
+        <span class="meta">31 panels 4 chapters</span>
+      </a>
+      <a class="card" href="jjp.html">
+        <span class="name">Jessica &amp; Judy&#x27;s Peril</span>
+        <span class="meta"></span>
+      </a>
+    </div>
+    <h2>Video Game Inspired</h2>
+    <div class="grid">
+      <a class="card" href="boundborne.html">
+        <span class="name">BoundBorne</span>
+        <span class="meta">213 panels 4 chapters</span>
+      </a>
+      <a class="card" href="corridor.html">
+        <span class="name">Corridor</span>
+        <span class="meta">67 panels</span>
+      </a>
+      <a class="card" href="disgust.html">
+        <span class="name">Disgusting Requests</span>
+        <span class="meta">79 panels</span>
+      </a>
+    </div>
+    <h2>DC</h2>
+    <div class="grid">
+      <a class="card" href="dc1.html">
+        <span class="name">Harley &amp; Poison</span>
+        <span class="meta">16 panels 2 chapters</span>
+      </a>
+      <a class="card" href="dc2.html">
+        <span class="name">Harley &amp; Poison II</span>
+        <span class="meta">41 panels 2 chapters</span>
+      </a>
+      <a class="card" href="harleyraven.html">
+        <span class="name">Harley &amp; Raven</span>
+        <span class="meta">15 panels</span>
+      </a>
+    </div>
+    <h2>All</h2>
     <div class="grid">
       <a class="card" href="aislinne.html">
         <span class="name">Aislinne</span>
@@ -94,7 +150,7 @@
       </a>
       <a class="card" href="jjp.html">
         <span class="name">Jessica &amp; Judy&#x27;s Peril</span>
-        <span class="meta">collection</span>
+        <span class="meta"></span>
       </a>
       <a class="card" href="kim.html">
         <span class="name">Kim</span>
