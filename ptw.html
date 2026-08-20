@@ -253,6 +253,8 @@ window.CONFIG = { title:"Project T White", artist:"Snadiya", artistSite:"https:/
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
     </div>
+    <button id="zOut" class="btn" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
+    <button id="zIn" class="btn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
     <div class="sizewrap" role="group" aria-label="Reading size">
       <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
       <span id="countTxt">1 / 1</span>
@@ -273,6 +275,8 @@ window.CONFIG = { title:"Project T White", artist:"Snadiya", artistSite:"https:/
   var C = window.CONFIG;
 
   var ICONS = {
+  "plus": "<path d=\"M12 5V19\" stroke=\"currentColor\" stroke-linecap=\"round\"/><path d=\"M5 12H19\" stroke=\"currentColor\" stroke-linecap=\"round\"/>",
+  "minus": "<path d=\"M5 12H19\" stroke=\"currentColor\" stroke-linecap=\"round\"/>",
   "menu": "<path d=\"M3 5H21\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M3 12H21\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M3 19H21\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
   "view-grid": "<path d=\"M14 20.4V14.6C14 14.2686 14.2686 14 14.6 14H20.4C20.7314 14 21 14.2686 21 14.6V20.4C21 20.7314 20.7314 21 20.4 21H14.6C14.2686 21 14 20.7314 14 20.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M3 20.4V14.6C3 14.2686 3.26863 14 3.6 14H9.4C9.73137 14 10 14.2686 10 14.6V20.4C10 20.7314 9.73137 21 9.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M14 9.4V3.6C14 3.26863 14.2686 3 14.6 3H20.4C20.7314 3 21 3.26863 21 3.6V9.4C21 9.73137 20.7314 10 20.4 10H14.6C14.2686 10 14 9.73137 14 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M3 9.4V3.6C3 3.26863 3.26863 3 3.6 3H9.4C9.73137 3 10 3.26863 10 3.6V9.4C10 9.73137 9.73137 10 9.4 10H3.6C3.26863 10 3 9.73137 3 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"/>",
   "bookmark": "<path d=\"M5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21L13.0815 17.1953C12.4227 16.7717 11.5773 16.7717 10.9185 17.1953L5 21Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
@@ -436,22 +440,27 @@ window.CONFIG = { title:"Project T White", artist:"Snadiya", artistSite:"https:/
   }
 
   /* ---------- pages mode ---------- */
-  var preloaded={};
+  var preloaded={}, PRELOAD_AHEAD=5;
   function preload(i){ if(i<0||i>=TOTAL||preloaded[i]){return;} var im=new Image();im.decoding="async";im.src=PAGES[i].src;preloaded[i]=im; }
   function renderPage(){
     onCard=null; shell.classList.remove("oncard");
-    stageZoom = SPOT[page] ? 1.5 : 1;   // spotlight pages come in extra-zoomed, silently
-    stage.textContent="";stage.classList.add("loading");
+    stageZoom = SPOT[page] ? 1.5 : 1;
     var want=page;
+    stage.classList.add("loading");
     var im=document.createElement("img");im.decoding="async";
     im.alt=CHAPTERS[PAGES[page].chapter].title+", page "+(page+1);
-    im.onload=function(){ if(page!==want||onCard){return;} stage.classList.remove("loading"); };
-    im.onerror=function(){ if(page!==want||onCard){return;} stage.classList.remove("loading"); };
     if(!fit){ im.style.maxHeight="none";im.style.width="100%"; }
+    im.style.transform="scale("+stageZoom+")";
+    function swap(){
+      if(page!==want||onCard){ return; }
+      stage.textContent=""; stage.appendChild(im); stage.scrollTop=0;
+      stage.classList.remove("loading"); syncZoomCursor();
+    }
+    im.onload=function(){ if(im.decode){ im.decode().then(swap,swap); } else { swap(); } };
+    im.onerror=swap;
     im.src=PAGES[page].src;
-    stage.appendChild(im);stage.scrollTop=0;
-    attachPanzoom(im);
-    preload(page+1);preload(page-1);
+    for(var k=1;k<=PRELOAD_AHEAD;k++){ preload(page+k); }
+    preload(page-1); preload(page-2);
     syncNav();
     if(autoIdx>0){ scheduleAuto(); }
   }
@@ -571,6 +580,8 @@ window.CONFIG = { title:"Project T White", artist:"Snadiya", artistSite:"https:/
     renderHelp();
     if(autoIdx>0){ scheduleAuto(); }
   }
+  document.getElementById("zIn").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom*1.25);}else{setStageZoom(stageZoom*1.25);}});
+  document.getElementById("zOut").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom/1.25);}else{setStageZoom(stageZoom/1.25);}});
   document.getElementById("mScroll").addEventListener("click",function(e){e.stopPropagation();setMode("scroll");});
   document.getElementById("mPages").addEventListener("click",function(e){e.stopPropagation();setMode("pages");});
 
@@ -639,11 +650,14 @@ window.CONFIG = { title:"Project T White", artist:"Snadiya", artistSite:"https:/
   function setStripZoom(z,anchorY){ var prev=stripZoom;z=Math.max(1,Math.min(4,z)); if(z===prev){return;}
     var a=(anchorY==null?vp.clientHeight/2:anchorY),before=vp.scrollTop+a;stripZoom=z;layer.style.transform="scale("+z+")";layer.style.width=(100/z)+"%";
     vp.scrollTop=before*(z/prev)-a;toast(z===1?"Zoom reset":"Zoom "+z.toFixed(1)+"x"); }
-  vp.addEventListener("wheel",function(e){ if(!e.ctrlKey){return;}
+  function wheelZoom(e){
+    if(!e.ctrlKey){ return; }
     e.preventDefault();
-    if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
-    else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); }
-  },{passive:false});
+    var f=(e.deltaY<0?1.12:1/1.12);
+    if(mode==="scroll"){ setStripZoom(stripZoom*f,e.clientY); } else { setStageZoom(stageZoom*f); }
+  }
+  vp.addEventListener("wheel",wheelZoom,{passive:false});
+  stage.addEventListener("wheel",wheelZoom,{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
     if(e.ctrlKey){return;}
