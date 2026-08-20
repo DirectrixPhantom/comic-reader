@@ -301,7 +301,7 @@ window.CONFIG = { title:"RECRUIT - Caitlyn in the Closet", artist:"Snadiya", art
       var idx=PAGES.length, d=(C.dims&&C.dims[idx])?C.dims[idx]:[1600,2400];
       PAGES.push({ src:(C.base||"")+ch.folder+ch.prefix+pad(n,ch.pad)+"."+ch.ext, chapter:ci, w:d[0], h:d[1] });
     }
-    CHAPTERS.push({ title:ch.title, from:start, to:PAGES.length-1, afterNote:ch.afterNote||null });
+    CHAPTERS.push({ title:ch.title, from:start, to:PAGES.length-1, afterNote:ch.afterNote||null, grid:ch.grid||null });
   });
   var TOTAL=PAGES.length, MULTI=CHAPTERS.length>1;
   var SPOT={}; (C.spotlight||[]).forEach(function(n){ SPOT[n-1]=true; });   // 0-indexed spotlight pages
@@ -616,7 +616,7 @@ window.CONFIG = { title:"RECRUIT - Caitlyn in the Closet", artist:"Snadiya", art
 
   var SHORTCUTS={
     pages:[["Reading",[["Right arrow, Space","Next"],["Left arrow","Previous"],["Home, End","First or last page"]]],
-           ["View",[["V","Switch to Scroll"],["Plus, Minus","Zoom the current page"],["0","Reset zoom"],["Control and scroll wheel","Zoom"],["Wheel over the page bar","Previous / next page"],["F","Fullscreen"]]],
+           ["View",[["V","Switch to Scroll"],["Up, Down","Jump a row (grid sets)"],["Plus, Minus","Zoom the current page"],["0","Reset zoom"],["Control and scroll wheel","Zoom"],["Wheel over the page bar","Previous / next page"],["F","Fullscreen"]]],
            ["Tools",[["T","All pages"],["B","Bookmark this page"],["Question mark","This list"],["Escape","Close"]]]],
     scroll:[["Reading",[["Space","Advance three quarters of a screen"],["Up, Down","Advance or go back"],["Home, End","Start or end"]]],
            ["View",[["V","Switch to Pages"],["Control and scroll wheel","Zoom"],["Wheel over the page bar","Previous / next page"],["F","Fullscreen"]]],
@@ -660,6 +660,26 @@ window.CONFIG = { title:"RECRUIT - Caitlyn in the Closet", artist:"Snadiya", art
     syncZoomCursor();
     toast(stageZoom===1?"Zoom reset":"Zoom "+stageZoom.toFixed(1)+"x"); }
 
+  /* ---- grid navigation: left/right = one step, up/down = one row ---- */
+  function gridInfo(){
+    if(mode!=="pages"||onCard){ return null; }
+    var c=CHAPTERS[PAGES[page].chapter];
+    if(!c||!c.grid||!c.grid.cols){ return null; }
+    var cols=c.grid.cols, local=page-c.from, span=c.to-c.from+1;
+    return {c:c,cols:cols,local:local,span:span,rows:Math.ceil(span/cols),
+            row:Math.floor(local/cols),col:local%cols};
+  }
+  function gridStep(dRow){
+    var g=gridInfo(); if(!g){ return false; }
+    var row=g.row+dRow;
+    if(row<0||row>=g.rows){ toast(dRow<0?"Top row":"Bottom row"); return true; }
+    var target=row*g.cols+g.col;
+    if(target>=g.span){ toast("No panel there"); return true; }
+    go(g.c.from+target);
+    var n=gridInfo();
+    if(n){ toast("Row "+(n.row+1)+" / "+n.rows+"  ·  Col "+(n.col+1)+" / "+n.cols); }
+    return true;
+  }
   document.addEventListener("keydown",function(e){
     if(e.metaKey||e.ctrlKey||e.altKey){return;} var tag=(e.target.tagName||"").toLowerCase(); if(tag==="input"||tag==="textarea"){return;}
     if(e.key==="?"){e.preventDefault();renderHelp();openSheet("help");return;}
@@ -670,6 +690,8 @@ window.CONFIG = { title:"RECRUIT - Caitlyn in the Closet", artist:"Snadiya", art
     if(e.key==="Escape"){ if(document.querySelector(".sheet.open")){closeSheets();} else {closeAllPops();} return; }
     if(mode==="pages"){ switch(e.key){
       case "ArrowRight":case " ":e.preventDefault();step(1);break; case "ArrowLeft":e.preventDefault();step(-1);break;
+      case "ArrowDown":if(gridStep(1)){e.preventDefault();}break;
+      case "ArrowUp":if(gridStep(-1)){e.preventDefault();}break;
       case "Home":e.preventDefault();go(0);break; case "End":e.preventDefault();go(TOTAL-1);break;
       case "+":case "=":e.preventDefault();setStageZoom(stageZoom*1.25);break; case "-":case "_":e.preventDefault();setStageZoom(stageZoom/1.25);break;
       case "0":e.preventDefault();setStageZoom(1);break; } return; }
