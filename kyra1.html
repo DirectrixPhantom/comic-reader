@@ -334,6 +334,7 @@ window.CONFIG = { title:"Kyra", artist:"Snadiya", artistSite:"https://linktr.ee/
   zone.setAttribute("aria-valuemax",String(TOTAL));
 
   var mode="pages",page=0,onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,tapAdvance=false,stageZoom=1,stripZoom=1,zscroll=0;
+  var WHEEL_NOTCH=30;
   var autoIdx=0,autoTimer=null,AUTO=[0,6000,4000,2500],AUTOLBL=["Off","Slow","Medium","Fast"];
 
   /* size dial */
@@ -658,13 +659,16 @@ window.CONFIG = { title:"Kyra", artist:"Snadiya", artistSite:"https://linktr.ee/
   stage.addEventListener("wheel",wheelZoom,{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
-    if(e.ctrlKey){return;}
+    if(e.ctrlKey){ return; }
     e.preventDefault();
     var d=(Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX);
-    if(!d){return;}
+    if(!d){ return; }
+    if(e.deltaMode===1){ d*=16; } else if(e.deltaMode===2){ d*=zone.clientHeight||400; }
     zscroll+=d;
-    var step=Math.trunc(zscroll/40); if(!step){return;}
-    zscroll-=step*40;
+    var step=0;
+    if(zscroll>=WHEEL_NOTCH){ step=1; zscroll=0; }
+    else if(zscroll<=-WHEEL_NOTCH){ step=-1; zscroll=0; }
+    if(!step){ return; }
     var i=Math.max(0,Math.min(TOTAL-1,currentIndex()+step));
     if(i!==currentIndex()){ go(i); }
   },{passive:false});
