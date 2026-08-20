@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
-<title>Peril — Snadiya</title>
+<title>Peril</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Peril">
 <meta property="og:image" content="https://snade-g1.nekoweb.org/peril/pack01/panel_001.webp">
@@ -638,6 +638,7 @@ window.CONFIG = { title:"Peril", artist:"Snadiya", artistSite:"https://linktr.ee
     if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
     else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); }
   },{passive:false});
+  // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
     if(e.ctrlKey){return;}
     e.preventDefault();

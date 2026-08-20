@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
-<title>Black + Gold — Snadiya</title>
+<title>Black + Gold</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Black + Gold">
 <meta property="og:image" content="https://snade-g1.nekoweb.org/panelgag/panel_001.webp">
@@ -638,6 +638,7 @@ window.CONFIG = { title:"Black + Gold", artist:"Snadiya", artistSite:"https://li
     if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
     else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); }
   },{passive:false});
+  // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
     if(e.ctrlKey){return;}
     e.preventDefault();

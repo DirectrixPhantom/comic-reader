@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
-<title>BoundBorne — Snadiya</title>
+<title>Disgusting Requests</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Disgusting Requests">
 <meta property="og:image" content="https://mira-96.nekoweb.org/disgust/panel_001.jpg">
@@ -13,9 +13,7 @@
 <meta property="og:site_name" content="Snadiya">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://mira-96.nekoweb.org/disgust/panel_001.jpg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oranienbaum&display=swap" rel="stylesheet">
+
 
 <!-- =====================================================================
      SNADIYA COMIC TEMPLATE — reusable reader
@@ -27,7 +25,7 @@
   :root{
     --bg:#1e1b2c; --surface:#393047; --surface-2:#5a356a; --sep:rgba(236,193,194,.42);
     --text:#ecc1c2; --text-2:#cda6b5; --amber:#f49c58; --amber-dk:#1e1b2c; --tint:#f49c58; --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184; --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
-    --measure:1080px; --nav-h:54px;
+    --measure:900px; --nav-h:54px;
     --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
            "Segoe UI Variable Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",sans-serif;
   }
@@ -57,19 +55,6 @@
   #backBtn:hover{background:var(--surface-2)} #backBtn:focus-visible{outline:2px solid var(--tint);outline-offset:-2px}
   #backBtn svg{width:24px;height:24px;stroke-width:2}
   @media(max-width:620px){ #backBtn .lab{display:none} }
-  #byline{flex:none;font-family:"Oranienbaum",Georgia,"Times New Roman",serif;font-size:19px;letter-spacing:.01em;
-    color:var(--amber);text-decoration:none;padding:0 8px;white-space:nowrap;line-height:1}
-  #byline:hover{text-decoration:underline}
-  #byline:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
-  @media(max-width:700px){ #byline{font-size:17px;padding:0 4px} }
-  /* iOS-style switch on toggle rows */
-  .btn.toggle{justify-content:space-between}
-  .sw{flex:none;width:42px;height:26px;border-radius:13px;background:var(--surface-2);border:1px solid var(--sep);
-    position:relative;transition:background .18s,border-color .18s;pointer-events:none}
-  .sw::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#cfc9bd;
-    transition:transform .18s ease,background .18s}
-  .btn.toggle[aria-pressed="true"] .sw{background:var(--tint);border-color:var(--tint)}
-  .btn.toggle[aria-pressed="true"] .sw::after{transform:translateX(16px);background:var(--amber-dk)}
 
   .titlewrap{flex:1;min-width:0;position:relative}
   #titleBtn{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px;
@@ -137,7 +122,7 @@
   #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--tint)}
   #knob{position:absolute;top:50%;left:0;width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--tint);transition:width .16s,height .16s,margin .16s}
   #scrubZone.live #knob{width:26px;height:26px;margin:-13px 0 0 -13px}
-  .tick{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--crimson);opacity:.9}
+  .tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--crimson);opacity:.85}
   #peek{position:absolute;bottom:calc(100% + 14px);left:0;z-index:60;transform:translateX(-50%) translateY(8px) scale(.94);
     transform-origin:50% 100%;opacity:0;pointer-events:none;transition:opacity .14s,transform .16s cubic-bezier(.2,.8,.3,1);
     background:var(--surface-2);border:1px solid var(--sep);padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.7)}
@@ -146,12 +131,18 @@
   #peek .cap{margin-top:5px;text-align:center;font-size:16px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
   #peek .chap{display:block;font-size:15px;font-weight:400;color:var(--text-2);margin-top:1px}
 
-  #countBtn{flex:none;min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:transparent;
-    border:1px solid transparent;color:var(--text);cursor:pointer;font-family:var(--font);font-size:17px;font-weight:600;
-    letter-spacing:-.01em;font-variant-numeric:tabular-nums;touch-action:manipulation}
-  #countBtn:hover{background:var(--surface-2);border-color:var(--sep)} #countBtn:focus-visible{outline:2px solid var(--tint);outline-offset:-2px}
-  #countBtn em{font-style:normal;color:var(--text-2);font-weight:400} #countBtn svg{width:20px;height:20px;stroke-width:1.7;color:var(--tint)}
-  @media(max-width:520px){ #countBtn .of{display:none} }
+  /* size dial */
+  .sizewrap{flex:none;display:flex;align-items:center}
+  .sizebtn{min-width:40px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid var(--sep);color:var(--text);cursor:pointer;font-family:var(--font);
+    font-size:17px;font-weight:700;touch-action:manipulation}
+  .sizebtn:hover{border-color:var(--tint);color:var(--tint)} .sizebtn:disabled{opacity:.3;cursor:default}
+  .sizebtn:focus-visible{outline:2px solid var(--tint);outline-offset:-2px}
+  .sizebtn.minus{border-right:0} .sizebtn .sm{font-size:13px} .sizebtn .lg{font-size:20px}
+  #countTxt{flex:none;font-size:16px;font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;
+    min-width:64px;text-align:center;padding:0 4px}
+  @media(max-width:560px){ #countTxt{min-width:52px;font-size:15px} }
+  @media(max-width:420px){ .sizewrap{display:none} }
 
   .popwrap{position:relative;flex:none}
   .pop{position:absolute;background:var(--surface);border:1px solid var(--sep);padding:6px;display:none;flex-direction:column;gap:1px;
@@ -217,7 +208,6 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
 <div class="shell" id="shell" data-mode="pages">
   <div id="topnav">
     <button id="backBtn"><span class="ico" data-i="nav-arrow-left"></span><span class="lab">All comics</span></button>
-    <a id="byline" target="_blank" rel="noopener">By Snadiya</a>
     <div class="titlewrap">
       <button id="titleBtn" aria-expanded="false" aria-controls="chapMenu"><b>Comic</b><span class="caret ico" data-i="chev-down"></span></button>
       <div class="pop" id="chapMenu" role="menu"></div>
@@ -233,14 +223,13 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
         <button class="btn" id="oMark"><span class="ico" data-i="bookmark"></span><span class="mtxt">Bookmark this page</span></button>
         <button class="btn" id="oMarks"><span class="ico" data-i="list"></span>Bookmarks</button>
         <div class="sep"></div>
-        <div class="lbl">Reading width</div>
-        <div class="sliderrow"><input id="width" type="range" min="480" max="1600" step="20" value="1080" aria-label="Reading width"><span id="widthVal">1080</span></div>
+        <div class="lbl">Brightness</div>
+        <div class="sliderrow"><input id="bright" type="range" min="30" max="100" value="100" aria-label="Brightness"><span id="brightVal">100%</span></div>
         <div class="sep"></div>
-        <button class="btn toggle" id="oAuto" aria-pressed="false">Auto-forward<span class="sw"></span></button>
-        <div class="sliderrow"><input id="autoSec" type="range" min="2" max="45" step="1" value="7" aria-label="Seconds per page"><span id="autoVal">7s</span></div>
-        <button class="btn toggle" id="oTap" aria-pressed="false">Tap to advance<span class="sw"></span></button>
+        <button class="btn" id="oAuto" aria-pressed="false">Auto-forward: Off</button>
+        <button class="btn" id="oFit" aria-pressed="true">Fit page to screen</button>
+        <button class="btn" id="oTap" aria-pressed="false">Tap to advance</button>
         <button class="btn" id="oFull"><span class="ico" data-i="expand"></span>Fullscreen</button>
-        <button class="btn" id="oDrive"><span class="ico" data-i="ext"></span>Google Drive</button>
         <button class="btn" id="oHelp">Keyboard shortcuts</button>
       </div>
     </div>
@@ -258,7 +247,11 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
     </div>
-    <button id="countBtn" aria-haspopup="dialog"><span id="countTxt">1</span><span class="ico" data-i="view-grid"></span></button>
+    <div class="sizewrap" role="group" aria-label="Reading size">
+      <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
+      <span id="countTxt">1 / 1</span>
+      <button class="sizebtn" id="sizeUp" aria-label="Bigger"><span class="lg">A</span>+</button>
+    </div>
     <button class="btn filled" id="nextBtn"><span class="lab">Next</span><span class="ico" data-i="nav-arrow-right"></span></button>
   </div>
 </div>
@@ -290,8 +283,7 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
     "page-flip":'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4.25A2.25 2.25 0 0 1 6.25 2h9a2.25 2.25 0 0 1 2.25 2.25v13a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 4 17.25zM7.747 5.5A.75.75 0 0 0 7 6.25c0 .414.334.75.747.75h6.006a.75.75 0 0 0 .747-.75a.75.75 0 0 0-.747-.75zm6.006 9H7.747a.75.75 0 0 0-.747.75c0 .414.334.75.747.75h6.006a.75.75 0 0 0 .747-.75a.75.75 0 0 0-.747-.75M7.747 10a.75.75 0 0 0-.747.75c0 .414.334.75.747.75h6.006a.75.75 0 0 0 .747-.75a.75.75 0 0 0-.747-.75zM6.629 20.5A2.25 2.25 0 0 0 8.75 22h6.5A4.75 4.75 0 0 0 20 17.25V6.75a2.25 2.25 0 0 0-1.5-2.122V17.25a3.25 3.25 0 0 1-3.25 3.25z"/></svg>',
     "scroll":'<svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M5 3.5A1.5 1.5 0 0 1 6.5 2h7A1.5 1.5 0 0 1 15 3.5v13a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 5 16.5zm7.354 5.354a.5.5 0 0 0 0-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L10 7.207l1.646 1.647a.5.5 0 0 0 .708 0m-4.708 2.292a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L10 12.793l-1.646-1.647a.5.5 0 0 0-.708 0"/></svg>',
     "chev-down":'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "chev-right":'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "ext":'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M12 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    "chev-right":'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
   function paintIcons(root){
     (root||document).querySelectorAll(".ico[data-i]").forEach(function(el){
@@ -326,7 +318,6 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
   document.title=C.title+" — "+C.artist;
   document.getElementById("titleBtn").querySelector("b").textContent=C.title;
   document.getElementById("backBtn").addEventListener("click",function(){ location.href=C.gallery; });
-  document.getElementById("byline").setAttribute("href", C.artistSite);
 
   var shell=document.getElementById("shell"),vp=document.getElementById("vp"),layer=document.getElementById("layer"),
       stage=document.getElementById("stage"),cardview=document.getElementById("cardview"),
@@ -335,13 +326,15 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
   zone.setAttribute("aria-valuemax",String(TOTAL));
 
   var mode="pages",page=0,onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,tapAdvance=false,stageZoom=1,stripZoom=1,zscroll=0;
-  var autoOn=false,autoSecVal=7,autoTimer=null;
+  var autoIdx=0,autoTimer=null,AUTO=[0,6000,4000,2500],AUTOLBL=["Off","Slow","Medium","Fast"];
 
+  /* size dial */
+  var WIDTHS=[560,720,900,1100,1400], WLABEL=["Snug","Comfy","Roomy","Wide","Extra wide"];
 
   var K_POS=KEY+":pos",K_MODE=KEY+":mode",K_MARKS=KEY+":marks",K_SCROLL=KEY+":s-scroll",K_PAGES=KEY+":s-pages";
   function rd(k,d){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;} }
   function wr(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
-  var sScroll=rd(K_SCROLL,{tapAdvance:false,measure:1080}),sPages=rd(K_PAGES,{fit:true,measure:1080});
+  var sScroll=rd(K_SCROLL,{tapAdvance:false,measure:900}),sPages=rd(K_PAGES,{fit:true,measure:900});
   marks=rd(K_MARKS,[])||[];
   function cur(){ return mode==="pages"?sPages:sScroll; }
   function saveCur(){ wr(mode==="pages"?K_PAGES:K_SCROLL,cur()); }
@@ -448,12 +441,13 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
     im.alt=CHAPTERS[PAGES[page].chapter].title+", page "+(page+1);
     im.onload=function(){ if(page!==want||onCard){return;} stage.classList.remove("loading"); };
     im.onerror=function(){ if(page!==want||onCard){return;} stage.classList.remove("loading"); };
+    if(!fit){ im.style.maxHeight="none";im.style.width="100%"; }
     im.src=PAGES[page].src;
     stage.appendChild(im);stage.scrollTop=0;
     attachPanzoom(im);
     preload(page+1);preload(page-1);
     syncNav();
-    if(autoOn){ scheduleAuto(); }
+    if(autoIdx>0){ scheduleAuto(); }
   }
   function showCard(c){
     onCard=c; shell.classList.add("oncard"); stage.classList.remove("loading");
@@ -467,7 +461,7 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
       d.querySelector("#cardGo").addEventListener("click",function(){ onCard=null; go(c.after+1); });
     }
     syncNav();
-    if(autoOn){ if(c.isEnd){ setAuto(false); } else { scheduleAuto(); } }
+    if(autoIdx>0){ if(c.isEnd){ setAuto(0); } else { scheduleAuto(); } }
   }
   function go(i){ if(i<0||i>=TOTAL){return;} page=i;stageZoom=1;
     if(mode==="pages"){ renderPage(); } else { onCard=null; var n=nodes[i]; if(n){ vp.scrollTo({top:n.offsetTop,behavior:"smooth"}); } } }
@@ -485,31 +479,31 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
   document.getElementById("prevBtn").addEventListener("click",function(){step(-1);});
   document.getElementById("nextBtn").addEventListener("click",function(){step(1);});
 
-  /* ---------- auto-forward (slider, seconds per page) ---------- */
+  /* ---------- auto-forward ---------- */
   function scheduleAuto(){
-    clearTimeout(autoTimer); if(!autoOn){return;}
-    var base=autoSecVal*1000;
+    clearTimeout(autoTimer); if(autoIdx===0){return;}
+    var base=AUTO[autoIdx];
     if(mode==="pages" && SPOT[page] && !onCard){ base=Math.round(base*2.2); } // linger on spotlight pages
     autoTimer=setTimeout(tickAuto,base);
   }
   function tickAuto(){
-    if(!autoOn){return;}
+    if(autoIdx===0){return;}
     if(mode==="pages"){
-      if(onCard && onCard.isEnd){ setAuto(false); return; }   // reached the end — stop
-      step(1);                                                // renderPage/showCard reschedule
+      if(onCard && onCard.isEnd){ setAuto(0); return; }   // reached the end — stop
+      step(1);                                            // step() reschedules
     } else {
-      if(vp.scrollTop>=maxScroll()-4){ setAuto(false); return; }
+      if(vp.scrollTop>=maxScroll()-4){ setAuto(0); return; }
       vp.scrollBy({top:vp.clientHeight*0.85,behavior:"smooth"});
       scheduleAuto();
     }
   }
-  function setAuto(on){
-    autoOn=on;
-    document.getElementById("oAuto").setAttribute("aria-pressed",String(on));
-    clearTimeout(autoTimer); if(on){ scheduleAuto(); }
+  function setAuto(idx){
+    autoIdx=idx;
+    var b=document.getElementById("oAuto");
+    b.textContent="Auto-forward: "+AUTOLBL[idx]; b.setAttribute("aria-pressed",String(idx>0));
+    clearTimeout(autoTimer); if(idx>0){ scheduleAuto(); }
   }
-  document.getElementById("oAuto").addEventListener("click",function(e){ e.stopPropagation(); setAuto(!autoOn); toast(autoOn?("Auto-forward on — "+autoSecVal+"s"):"Auto-forward off"); });
-  document.getElementById("autoSec").addEventListener("input",function(){ autoSecVal=+this.value; document.getElementById("autoVal").textContent=autoSecVal+"s"; if(autoOn){ scheduleAuto(); } });
+  document.getElementById("oAuto").addEventListener("click",function(e){ e.stopPropagation(); setAuto((autoIdx+1)%AUTO.length); toast("Auto-forward: "+AUTOLBL[autoIdx]); });
 
   /* ---------- scrubber ---------- */
   var liveS=false,previewIdx=0;
@@ -536,19 +530,25 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
     else if(e.key==="Home"){e.preventDefault();e.stopPropagation();go(0);}
     else if(e.key==="End"){e.preventDefault();e.stopPropagation();go(TOTAL-1);} });
 
-  /* ---------- reading width (granular slider) + all-pages button ---------- */
-  function applyMeasure(w,persist){
-    w=Math.max(480,Math.min(1600,Math.round(w)));
-    shell.style.setProperty("--measure",w+"px");
-    var wi=document.getElementById("width"); if(wi){ wi.value=w; document.getElementById("widthVal").textContent=w; }
+  /* ---------- size dial ---------- */
+  function nearestWidthIndex(w){ var best=0,bd=1e9; WIDTHS.forEach(function(x,k){ var dd=Math.abs(x-w); if(dd<bd){bd=dd;best=k;} }); return best; }
+  function applySize(idx,persist){
+    idx=Math.max(0,Math.min(WIDTHS.length-1,idx));
+    var w=WIDTHS[idx]; shell.style.setProperty("--measure",w+"px");
+    document.getElementById("sizeDown").disabled=(idx===0);
+    document.getElementById("sizeUp").disabled=(idx===WIDTHS.length-1);
     if(persist){ cur().measure=w;saveCur(); }
+    return idx;
   }
-  document.getElementById("width").addEventListener("input",function(){
-    var keep=currentIndex(); applyMeasure(+this.value,true);
+  function stepSize(d){
+    var keep=currentIndex();
+    var idx=nearestWidthIndex(cur().measure||900)+d;
+    idx=applySize(idx,true);
+    toast(WLABEL[idx]+" — "+WIDTHS[idx]+" px");
     if(mode==="scroll"){ void vp.offsetHeight; if(nodes[keep]){vp.scrollTop=nodes[keep].offsetTop;} syncNav(); }
-  });
-  document.getElementById("countBtn").addEventListener("click",function(e){ e.stopPropagation();updateThumbCurrent();openSheet("thumbs");
-    var c=document.querySelector('.thumb[aria-current="true"]'); if(c){c.scrollIntoView({block:"center"});} });
+  }
+  document.getElementById("sizeDown").addEventListener("click",function(e){e.stopPropagation();stepSize(-1);});
+  document.getElementById("sizeUp").addEventListener("click",function(e){e.stopPropagation();stepSize(1);});
 
   /* ---------- mode ---------- */
   function setMode(m){ if(m!=="pages"){ killPanzoom(); }
@@ -557,12 +557,13 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
     if(m!=="pages"){ onCard=null; shell.classList.remove("oncard"); }
     document.getElementById("mScroll").setAttribute("aria-pressed",String(m==="scroll"));
     document.getElementById("mPages").setAttribute("aria-pressed",String(m==="pages"));
-    wr(K_MODE,m); var s=cur(); tapAdvance=!!s.tapAdvance;
+    wr(K_MODE,m); var s=cur(); fit=s.fit!==false;tapAdvance=!!s.tapAdvance;
+    document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
     document.getElementById("oTap").setAttribute("aria-pressed",String(tapAdvance));
-    applyMeasure(s.measure||1080,false);
+    applySize(nearestWidthIndex(s.measure||900),false);
     if(m==="pages"){ page=carry;stageZoom=1;renderPage(); } else { void vp.offsetHeight; if(nodes[carry]){ vp.scrollTop=nodes[carry].offsetTop; } syncNav(); }
     renderHelp();
-    if(autoOn){ scheduleAuto(); }
+    if(autoIdx>0){ scheduleAuto(); }
   }
   document.getElementById("mScroll").addEventListener("click",function(e){e.stopPropagation();setMode("scroll");});
   document.getElementById("mPages").addEventListener("click",function(e){e.stopPropagation();setMode("pages");});
@@ -579,10 +580,12 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
   function closeAllPops(){ opts.classList.remove("open");optBtn.setAttribute("aria-expanded","false");chapMenu.classList.remove("open");titleBtn.setAttribute("aria-expanded","false"); }
   optBtn.addEventListener("click",function(e){ e.stopPropagation();var o=!opts.classList.contains("open");closeAllPops();opts.classList.toggle("open",o);optBtn.setAttribute("aria-expanded",String(o)); });
   opts.addEventListener("click",function(e){e.stopPropagation();});
-  if(MULTI){ titleBtn.addEventListener("click",function(e){ e.stopPropagation();var o=!chapMenu.classList.contains("open");closeAllPops();chapMenu.classList.toggle("open",o);titleBtn.setAttribute("aria-expanded",String(o)); });
+  if(HASMENU){ titleBtn.addEventListener("click",function(e){ e.stopPropagation();var o=!chapMenu.classList.contains("open");closeAllPops();chapMenu.classList.toggle("open",o);titleBtn.setAttribute("aria-expanded",String(o)); });
     chapMenu.addEventListener("click",function(e){e.stopPropagation();}); }
   document.addEventListener("click",closeAllPops);
 
+  document.getElementById("bright").addEventListener("input",function(){ var v=+this.value;shell.style.setProperty("--bright",(v/100).toFixed(2));shell.classList.toggle("dim",v<100);document.getElementById("brightVal").textContent=v+"%"; });
+  document.getElementById("oFit").addEventListener("click",function(e){ e.stopPropagation();fit=!fit;this.setAttribute("aria-pressed",String(fit));cur().fit=fit;saveCur();if(mode==="pages"&&!onCard){renderPage();}toast(fit?"Fit page to screen":"Full width"); });
   document.getElementById("oTap").addEventListener("click",function(e){ e.stopPropagation();tapAdvance=!tapAdvance;this.setAttribute("aria-pressed",String(tapAdvance));cur().tapAdvance=tapAdvance;saveCur();toast(tapAdvance?"Tapping the art advances":"Tapping the art does nothing"); });
 
   /* ---------- sheets ---------- */
@@ -613,10 +616,10 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
 
   var SHORTCUTS={
     pages:[["Reading",[["Right arrow, Space","Next"],["Left arrow","Previous"],["Home, End","First or last page"]]],
-           ["View",[["V","Switch to Scroll"],["Up, Down","Jump a row (grid sets)"],["Plus, Minus","Zoom the current page"],["0","Reset zoom"],["F","Fullscreen"]]],
+           ["View",[["V","Switch to Scroll"],["Up, Down","Jump a row (grid sets)"],["Plus, Minus","Zoom the current page"],["0","Reset zoom"],["Control and scroll wheel","Zoom"],["Wheel over the page bar","Previous / next page"],["F","Fullscreen"]]],
            ["Tools",[["T","All pages"],["B","Bookmark this page"],["Question mark","This list"],["Escape","Close"]]]],
     scroll:[["Reading",[["Space","Advance three quarters of a screen"],["Up, Down","Advance or go back"],["Home, End","Start or end"]]],
-           ["View",[["V","Switch to Pages"],["Control and scroll wheel","Zoom"],["F","Fullscreen"]]],
+           ["View",[["V","Switch to Pages"],["Control and scroll wheel","Zoom"],["Wheel over the page bar","Previous / next page"],["F","Fullscreen"]]],
            ["Tools",[["T","All pages"],["B","Bookmark this page"],["Question mark","This list"],["Escape","Close"]]]]
   };
   function renderHelp(){ var b=document.getElementById("helpBody");b.textContent="";
@@ -626,33 +629,37 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
 
   function toggleFull(){ if(!document.fullscreenElement){ if(shell.requestFullscreen){ shell.requestFullscreen().catch(function(){toast("Fullscreen isn't available here");}); } else { toast("Fullscreen isn't supported in this browser"); } } else { document.exitFullscreen(); } }
   document.getElementById("oFull").addEventListener("click",function(e){e.stopPropagation();closeAllPops();toggleFull();});
-  (function(){ var db=document.getElementById("oDrive");
-    if(C.driveUrl){ db.addEventListener("click",function(e){e.stopPropagation();closeAllPops();window.open(C.driveUrl,"_blank","noopener");}); }
-    else { db.style.display="none"; } })();
 
-  function setStripZoom(z,anchorY){ var prev=stripZoom;z=Math.max(1,Math.min(12,z)); if(z===prev){return;}
+  function setStripZoom(z,anchorY){ var prev=stripZoom;z=Math.max(1,Math.min(4,z)); if(z===prev){return;}
     var a=(anchorY==null?vp.clientHeight/2:anchorY),before=vp.scrollTop+a;stripZoom=z;layer.style.transform="scale("+z+")";layer.style.width=(100/z)+"%";
     vp.scrollTop=before*(z/prev)-a;toast(z===1?"Zoom reset":"Zoom "+z.toFixed(1)+"x"); }
+  vp.addEventListener("wheel",function(e){ if(!e.ctrlKey){return;}
+    e.preventDefault();
+    if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
+    else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); }
+  },{passive:false});
+  // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
+  zone.addEventListener("wheel",function(e){
+    if(e.ctrlKey){return;}
+    e.preventDefault();
+    var d=(Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX);
+    if(!d){return;}
+    zscroll+=d;
+    var step=Math.trunc(zscroll/40); if(!step){return;}
+    zscroll-=step*40;
+    var i=Math.max(0,Math.min(TOTAL-1,currentIndex()+step));
+    if(i!==currentIndex()){ go(i); }
+  },{passive:false});
+  /* ---- zoom + pan (Panzoom, vendored; degrades to plain scale if absent) ---- */
   var pz=null;
   function killPanzoom(){ if(pz){ try{pz.destroy();}catch(_){} pz=null; } }
   function attachPanzoom(im){ killPanzoom(); im.style.transform="scale("+stageZoom+")"; syncZoomCursor(); }
-  function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor="auto"; } }
+  function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor = stageZoom>1.01?"grab":"auto"; } }
   function setStageZoom(z){ if(onCard){return;}
     stageZoom=Math.max(1,Math.min(6,z));
     var im=stage.querySelector("img"); if(im){ im.style.transform="scale("+stageZoom+")"; }
     syncZoomCursor();
     toast(stageZoom===1?"Zoom reset":"Zoom "+stageZoom.toFixed(1)+"x"); }
-  vp.addEventListener("wheel",function(e){ if(!e.ctrlKey){return;} e.preventDefault();
-    if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
-    else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); } },{passive:false});
-  zone.addEventListener("wheel",function(e){ if(e.ctrlKey){return;} e.preventDefault();
-    var d=(Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX); if(!d){return;}
-    zscroll+=d; var step=Math.trunc(zscroll/40); if(!step){return;} zscroll-=step*40;
-    var i=Math.max(0,Math.min(TOTAL-1,currentIndex()+step));
-    if(i!==currentIndex()){ go(i); } },{passive:false});
-  document.getElementById("content").addEventListener("wheel",function(e){ if(!e.ctrlKey){return;} e.preventDefault();
-    if(mode==="scroll"){ setStripZoom(stripZoom*(e.deltaY<0?1.12:1/1.12),e.clientY); }
-    else { setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12)); } },{passive:false});
 
   /* ---- grid navigation: left/right = one step, up/down = one row ---- */
   function gridInfo(){
@@ -699,9 +706,10 @@ window.CONFIG = { title:"Disgusting Requests", artist:"Snadiya", artistSite:"htt
   buildScroll();buildChapMenu();buildThumbs();placeTicks();
   var savedPos=rd(K_POS,null); if(savedPos&&typeof savedPos.i==="number"){ page=Math.min(TOTAL-1,Math.max(0,savedPos.i)); }
   var savedMode=rd(K_MODE,(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||navigator.maxTouchPoints>0?"scroll":"pages"); var s0=savedMode==="pages"?sPages:sScroll;
-  tapAdvance=!!s0.tapAdvance;
+  fit=s0.fit!==false;tapAdvance=!!s0.tapAdvance;
+  document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
   document.getElementById("oTap").setAttribute("aria-pressed",String(tapAdvance));
-  applyMeasure(s0.measure||1080,false);
+  applySize(nearestWidthIndex(s0.measure||900),false);
   renderMarks();renderHelp();
   if(savedMode==="scroll"){ mode="pages";setMode("scroll"); } else { renderPage(); }
   setTimeout(function(){ if(mode==="scroll"){ if(nodes[page]){ vp.scrollTop=nodes[page].offsetTop; } } syncNav(); },60);
