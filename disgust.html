@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <title>Disgusting Requests</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Disgusting Requests">
@@ -26,8 +29,8 @@
     --bg:#1e1b2c; --surface:#393047; --surface-2:#5a356a; --sep:rgba(236,193,194,.42);
     --text:#ecc1c2; --text-2:#cda6b5; --amber:#f49c58; --amber-dk:#1e1b2c; --tint:#f49c58; --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184; --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
     --measure:900px; --nav-h:54px;
-    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
-           "Segoe UI Variable Text","Segoe UI",system-ui,Roboto,"Helvetica Neue",sans-serif;
+    --font:"Source Sans 3","Source Sans Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",sans-serif;
+    --font-head:"Literata",Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
@@ -85,6 +88,7 @@
     border:2px solid var(--sep);border-top-color:var(--tint);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+  #titleBtn b,.card .big,.endwrap h2,#peekChap{font-family:var(--font-head);font-weight:600}
   #stage img{display:block;max-width:min(100%,var(--measure));max-height:100%;width:auto;height:auto;transform-origin:center center}
   #stage.loading::after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;
     border:2px solid var(--sep);border-top-color:var(--tint);border-radius:50%;animation:spin .8s linear infinite}
