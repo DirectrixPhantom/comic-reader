@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <title>Dovah</title>
+<meta name="author" content="Snadiya">
+<meta name="source" content="https://drive.google.com/drive/folders/1p2yics80q3LNB9H3J_iNXUitMdEwQrWV">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Dovah">
 <meta property="og:image" content="https://mira-96.nekoweb.org/dovah/p1_000.jpg">
@@ -87,7 +89,7 @@
   .panel.pending::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;
     border:2px solid var(--sep);border-top-color:var(--tint);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+  #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;overscroll-behavior:contain}
   #titleBtn b,.card .big,.endwrap h2,#peekChap{font-family:var(--font-head);font-weight:600}
   #stage img{display:block;max-width:min(100%,var(--measure));max-height:100%;width:auto;height:auto;transform-origin:center center}
   #stage.loading::after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;
@@ -657,7 +659,22 @@ window.CONFIG = { title:"Dovah", artist:"Snadiya", artistSite:"https://linktr.ee
     if(mode==="scroll"){ setStripZoom(stripZoom*f,e.clientY); } else { setStageZoom(stageZoom*f); }
   }
   vp.addEventListener("wheel",wheelZoom,{passive:false});
-  stage.addEventListener("wheel",wheelZoom,{passive:false});
+  var pagescroll=0;
+  stage.addEventListener("wheel",function(e){
+    if(e.ctrlKey){ wheelZoom(e); return; }
+    if(mode!=="pages"||onCard){ return; }
+    var im=stage.querySelector("img");
+    if(stageZoom>1.01&&im&&(stage.scrollHeight>stage.clientHeight||stage.scrollWidth>stage.clientWidth)){ return; }
+    e.preventDefault();
+    var d=e.deltaY;
+    if(e.deltaMode===1){ d*=16; } else if(e.deltaMode===2){ d*=stage.clientHeight||600; }
+    if(!d){ return; }
+    pagescroll+=d;
+    var st=0;
+    if(pagescroll>=WHEEL_NOTCH){ st=1; pagescroll=0; }
+    else if(pagescroll<=-WHEEL_NOTCH){ st=-1; pagescroll=0; }
+    if(st){ step(st); }
+  },{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
     if(e.ctrlKey){ return; }
