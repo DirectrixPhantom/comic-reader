@@ -7,9 +7,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <title>Sketches</title>
-<meta name="author" content="Snadiya">
-<meta name="source" content="https://drive.google.com/drive/folders/1E2ndNrSdYC8ePjLCztn4yL4bJWfQDMk9">
-<meta property="og:type" content="website"><meta property="og:title" content="Sketches">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sketches">
 <meta property="og:image" content="https://snade-g1.nekoweb.org/sketches/01/sketch-001.webp">
 <meta property="og:url" content="https://snade-g1.nekoweb.org/sketches.html">
 <meta property="og:site_name" content="Snadiya">
@@ -654,21 +653,8 @@ window.CONFIG = { title:"Sketches", artist:"Snadiya", artistSite:"https://linktr
     if(mode==="scroll"){ setStripZoom(stripZoom*f,e.clientY); } else { setStageZoom(stageZoom*f); }
   }
   vp.addEventListener("wheel",wheelZoom,{passive:false});
-  var pagescroll=0;
   stage.addEventListener("wheel",function(e){
-    if(e.ctrlKey){ wheelZoom(e); return; }
-    if(mode!=="pages"||onCard){ return; }
-    var im=stage.querySelector("img");
-    if(stageZoom>1.01&&im&&(stage.scrollHeight>stage.clientHeight||stage.scrollWidth>stage.clientWidth)){ return; }
-    e.preventDefault();
-    var d=e.deltaY;
-    if(e.deltaMode===1){ d*=16; } else if(e.deltaMode===2){ d*=stage.clientHeight||600; }
-    if(!d){ return; }
-    pagescroll+=d;
-    var st=0;
-    if(pagescroll>=WHEEL_NOTCH){ st=1; pagescroll=0; }
-    else if(pagescroll<=-WHEEL_NOTCH){ st=-1; pagescroll=0; }
-    if(st){ step(st); }
+    if(e.ctrlKey){ wheelZoom(e); }
   },{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){

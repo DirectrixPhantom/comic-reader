@@ -660,21 +660,8 @@ window.CONFIG = { title:"Afflatus", artist:"Snadiya", artistSite:"https://linktr
     if(mode==="scroll"){ setStripZoom(stripZoom*f,e.clientY); } else { setStageZoom(stageZoom*f); }
   }
   vp.addEventListener("wheel",wheelZoom,{passive:false});
-  var pagescroll=0;
   stage.addEventListener("wheel",function(e){
-    if(e.ctrlKey){ wheelZoom(e); return; }
-    if(mode!=="pages"||onCard){ return; }
-    var im=stage.querySelector("img");
-    if(stageZoom>1.01&&im&&(stage.scrollHeight>stage.clientHeight||stage.scrollWidth>stage.clientWidth)){ return; }
-    e.preventDefault();
-    var d=e.deltaY;
-    if(e.deltaMode===1){ d*=16; } else if(e.deltaMode===2){ d*=stage.clientHeight||600; }
-    if(!d){ return; }
-    pagescroll+=d;
-    var st=0;
-    if(pagescroll>=WHEEL_NOTCH){ st=1; pagescroll=0; }
-    else if(pagescroll<=-WHEEL_NOTCH){ st=-1; pagescroll=0; }
-    if(st){ step(st); }
+    if(e.ctrlKey){ wheelZoom(e); }
   },{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
