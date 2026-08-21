@@ -91,7 +91,7 @@
   .panel.pending::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;
     border:2px solid var(--sep);border-top-color:var(--tint);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;overscroll-behavior:contain}
+  #stage{position:absolute;inset:0;display:flex;align-items:safe center;justify-content:safe center;padding:14px;overflow:auto;overscroll-behavior:contain}
   #titleBtn b,.card .big,.endwrap h2,#peekChap{font-family:var(--font-head);font-weight:600}
   #stage img{display:block;max-width:min(100%,var(--measure));max-height:100%;width:auto;height:auto;transform-origin:center center}
   #stage.loading::after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;
@@ -1188,8 +1188,7 @@ window.CONFIG = {
     var im=document.createElement("img");im.decoding="async";
     im.alt=CHAPTERS[PAGES[page].chapter].title+", page "+(page+1);
     if(!fit){ im.style.maxHeight="none";im.style.width="100%"; }
-    im.style.transform="scale("+stageZoom+")";
-    function swap(){
+        function swap(){
       if(page!==want||onCard){ return; }
       stage.textContent=""; stage.appendChild(im); stage.scrollTop=0;
       stage.classList.remove("loading"); syncZoomCursor();
@@ -1416,11 +1415,32 @@ window.CONFIG = {
   /* ---- zoom + pan (Panzoom, vendored; degrades to plain scale if absent) ---- */
   var pz=null;
   function killPanzoom(){ if(pz){ try{pz.destroy();}catch(_){} pz=null; } }
-  function attachPanzoom(im){ killPanzoom(); im.style.transform="scale("+stageZoom+")"; syncZoomCursor(); }
+  var fitW=0;
+  function measureFit(im){
+    im.style.maxWidth=""; im.style.maxHeight=""; im.style.width=""; im.style.height="";
+    fitW=im.offsetWidth||im.naturalWidth||900;
+  }
+  function applyZoom(){
+    var im=stage.querySelector("img"); if(!im){ return; }
+    if(stageZoom<=1.001){
+      im.style.maxWidth=""; im.style.maxHeight=""; im.style.width=""; im.style.height="";
+    } else {
+      im.style.maxWidth="none"; im.style.maxHeight="none";
+      im.style.width=Math.round(fitW*stageZoom)+"px"; im.style.height="auto";
+    }
+  }
+  function attachPanzoom(im){ measureFit(im); applyZoom(); syncZoomCursor(); }
   function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor = stageZoom>1.01?"grab":"auto"; } }
   function setStageZoom(z){ if(onCard){return;}
+    var prev=stageZoom;
     stageZoom=Math.max(1,Math.min(6,z));
-    var im=stage.querySelector("img"); if(im){ im.style.transform="scale("+stageZoom+")"; }
+    var st=stage, before={x:st.scrollLeft+st.clientWidth/2, y:st.scrollTop+st.clientHeight/2};
+    applyZoom();
+    if(stageZoom>1.001&&prev>0){
+      var r=stageZoom/prev;
+      st.scrollLeft=before.x*r-st.clientWidth/2;
+      st.scrollTop=before.y*r-st.clientHeight/2;
+    }
     syncZoomCursor();
     toast(stageZoom===1?"Zoom reset":"Zoom "+stageZoom.toFixed(1)+"x"); }
 
