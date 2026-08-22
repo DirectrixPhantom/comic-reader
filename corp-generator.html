@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Corporation Generator</title>
+
+<meta property="og:title" content="Corporation Generator">
+<meta property="og:description" content="Corporation Generator">
+<meta property="og:image" content="https://snade-comics-b-1.neocities.org/corp-generator-og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://directrixphantom.github.io/comic-reader/corp-generator.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Corporation Generator">
+<meta name="twitter:description" content="Corporation Generator">
+<meta name="twitter:image" content="https://snade-comics-b-1.neocities.org/corp-generator-og.png">
+
+<style>
+  :root{
+    --paper:#e7e7e4;
+    --card:#eeeeec;
+    --ink:#111111;
+    --blue:#1c1cdb;
+    --rule:#b9b9b4;
+    --watermark:rgba(20,20,20,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    background:var(--paper);
+    overflow:hidden;
+  }
+  body{
+    color:var(--ink);
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    padding:clamp(6px,1.5vh,20px) clamp(6px,2vw,20px);
+  }
+  .sheet{
+    position:relative;
+    width:100%;
+    max-width:1100px;
+    background:var(--card);
+    padding:clamp(14px,3vh,40px) clamp(16px,3.5vw,48px);
+    overflow:hidden;
+    isolation:isolate;
+    display:flex;
+    flex-direction:column;
+    gap:clamp(4px,1vh,12px);
+  }
+  .sheet::before{
+    content:"CONFIDENTIAL";
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%) rotate(-27deg);
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:900;
+    font-size:clamp(64px,16vh,190px);
+    letter-spacing:0.04em;
+    color:var(--watermark);
+    white-space:nowrap;
+    z-index:0;
+    pointer-events:none;
+  }
+  .sheet > *{ position:relative; z-index:1; }
+
+  h1.title{
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:900;
+    font-style:normal;
+    color:var(--blue);
+    font-size:clamp(26px,7vh,58px);
+    letter-spacing:-0.04em;
+    margin:0;
+    text-transform:uppercase;
+    flex:0 0 auto;
+    display:flex;
+    flex-direction:column;
+  }
+  h1.title > span{
+    display:block;
+    line-height:0.8;
+    font-style:normal;
+  }
+  h1.title .line2{
+    margin-top:-0.252em;
+  }
+
+  .roll-all{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    flex:0 0 auto;
+  }
+  .btn{
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:800;
+    font-size:clamp(10px,1.6vh,13px);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:var(--blue);
+    color:var(--card);
+    border:none;
+    padding:clamp(6px,1.2vh,12px) clamp(12px,2vw,20px);
+    cursor:pointer;
+    transition:transform 60ms ease, background 100ms ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn:hover{ background:#1414b8; }
+  .btn.small{
+    padding:clamp(3px,0.7vh,5px) clamp(8px,1.4vw,11px);
+    font-size:clamp(9px,1.2vh,10px);
+  }
+  .btn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  .readout{
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:700;
+    font-size:clamp(22px,3.6vh,30px);
+    color:var(--ink);
+    border-left:4px solid var(--blue);
+    padding:4px 0 4px 12px;
+    line-height:1.5;
+    width:100%;
+  }
+  .readout .name-line{
+    display:block;
+    height:1.3em;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .readout .sub{
+    display:block;
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:500;
+    font-size:0.85em;
+    color:#333;
+  }
+  .readout #readoutIndustry{
+    height:1.3em;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .readout #readoutControversy{
+    height:2.6em;
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+  .readout .sub:empty::before{ content:"\00a0"; }
+  .c{ display:inline-block; white-space:pre; }
+
+  .content{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    gap:clamp(6px,1.4vh,14px);
+    overflow-y:auto;
+  }
+  .content .full-width{
+    flex:0 0 auto;
+    padding:0 !important;
+    border:none !important;
+  }
+  .lists{
+    flex:0 1 auto;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:0;
+    border-top:1px dotted var(--rule);
+    padding-top:clamp(6px,1.2vh,12px);
+  }
+  .col{
+    padding:0 clamp(6px,1.4vw,20px);
+    min-width:0;
+    overflow:hidden;
+  }
+  .col + .col{
+    border-left:1px dotted var(--rule);
+  }
+  .col:first-child{ padding-left:0; }
+
+  h2.section{
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:800;
+    color:var(--blue);
+    font-size:clamp(11px,2vh,17px);
+    letter-spacing:-0.01em;
+    margin:0 0 2px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px;
+    text-transform:uppercase;
+    flex-wrap:wrap;
+  }
+  h2.section .foot{
+    font-size:0.6em;
+    vertical-align:super;
+    font-weight:700;
+  }
+
+  ol.rollable{
+    list-style:none;
+    margin:clamp(4px,0.8vh,8px) 0 0;
+    padding:0;
+  }
+  ol.rollable li{
+    font-size:clamp(9.5px,1.6vh,13.5px);
+    font-weight:500;
+    line-height:1.42;
+    padding:0 3px;
+  }
+  ol.rollable li b{
+    color:var(--blue);
+    font-weight:800;
+    margin-right:4px;
+  }
+  ol.rollable li.hit{
+    background:var(--blue);
+    color:var(--card);
+  }
+  ol.rollable li.hit b{ color:var(--card); }
+
+  .controversy p{
+    font-size:clamp(9.5px,1.55vh,13px);
+    line-height:1.48;
+    text-align:justify;
+    margin:clamp(4px,0.8vh,8px) 0 0;
+  }
+  .controversy span.entry.hit{
+    background:var(--blue);
+    color:var(--card);
+    box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+  }
+  .controversy span.entry.hit b{ color:var(--card); }
+  .controversy span.entry b{
+    color:var(--blue);
+    font-weight:800;
+  }
+
+  .mark{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    color:#8c8c88;
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight:700;
+    font-size:clamp(10px,1.6vh,14px);
+    letter-spacing:0.04em;
+    text-decoration:none;
+    cursor:pointer;
+    transition:color 100ms ease;
+  }
+  .mark:hover,
+  .mark:focus-visible{ color:var(--blue); }
+  .mark:focus-visible{ outline:2px solid var(--blue); outline-offset:3px; }
+  .mark svg{ width:1.2em; height:1.2em; }
+
+  @media (max-width:900px){
+    .lists{ grid-template-columns:1fr 1fr; grid-auto-rows:min-content; row-gap:clamp(4px,1vh,10px); }
+    .lists .col:nth-child(3){ grid-column:1 / -1; border-left:none; padding-left:0; border-top:1px dotted var(--rule); padding-top:6px; margin-top:4px; }
+  }
+  @media (max-width:560px){
+    .lists{ grid-template-columns:1fr; }
+    .lists .col{ border-left:none !important; padding:0 !important; }
+    .lists .col:not(:first-child){ border-top:1px dotted var(--rule); padding-top:6px !important; margin-top:4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet" id="sheet">
+
+  <h1 class="title"><span class="line1" id="titleLine1">Corporation</span><span class="line2" id="titleLine2">Generator</span></h1>
+
+  <div class="roll-all">
+    <button class="btn" id="rollAll">Roll to generate</button>
+    <div class="readout" id="readout" aria-live="polite">
+      <span class="name-line" id="readoutName">No corporation on file yet.</span>
+      <span class="sub" id="readoutIndustry"></span>
+      <span class="sub" id="readoutControversy"></span>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="col controversy full-width">
+      <h2 class="section">Latest controversy<span class="foot">2</span> <button class="btn small" data-roll="controversy">Roll</button></h2>
+      <p id="controversyBlock"></p>
+    </div>
+
+    <div class="lists">
+      <div class="col">
+        <h2 class="section">Name Part One<span class="foot">1</span> <button class="btn small" data-roll="one">Roll</button></h2>
+        <ol class="rollable" id="listOne"></ol>
+      </div>
+
+      <div class="col">
+        <h2 class="section">Name Part Two<span class="foot">1</span> <button class="btn small" data-roll="two">Roll</button></h2>
+        <ol class="rollable" id="listTwo"></ol>
+      </div>
+
+      <div class="col">
+        <h2 class="section">Main industry<span class="foot">1</span> <button class="btn small" data-roll="industry">Roll</button></h2>
+        <ol class="rollable" id="listIndustry"></ol>
+      </div>
+    </div>
+  </div>
+
+  <a class="mark" href="https://jetwong.neocities.org/">
+    DESYNC
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" role="img" aria-label="X mark"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+  </a>
+
+</div>
+
+<script>
+(function(){
+  const partOne = ["Cy","Kifo","Fosse","Ütga","Crown's","Galg","Smrt","Gene","Pereo","Progen","Häx","Futura"];
+  const partTwo = ["Futures","Tech","Inc","Industrial","Labs","Nero","Mgmt","Svärta","Wave","Institute","Division","Malum"];
+  const industry = ["Propaganda/news","Lifestyle","Property","Finance","Biomedical","Food Products","Raw material","Entertainment","Weapons","Legal/lobbying","Security","Transport"];
+  const controversy = [
+    "Massive collateral damage in corp war.",
+    "Selling undisclosed cloned human meat.",
+    "Supplying violent gangs with personal data for profit.",
+    "Non-informed human test subjects.",
+    "Mandatory Osleep for every employee working 48+ hour shifts.",
+    "Rumors of several board members being part of a cannibal cult.",
+    "Offering homeless people 10\u00a4 to equip them with subdermal projectors for displaying advertisements.",
+    "Kidnapping a competitor's key staff.",
+    "Hazardous waste dumping.",
+    "Cybertech enhancements made mandatory for certain employees.",
+    "Selling dead employees' body parts after workplace accidents.",
+    "Employee contracts include the rights to firstborn children.",
+    "Rules against dating non-employees.",
+    "Assassinating several product reviewers and critics.",
+    "Dropping a weaponized meme on a public square, resulting in 138 deaths.",
+    "Non-consensual cloning.",
+    "Increasing employee loyalty through secret memory alterations.",
+    "Kidnapping customers, releasing them into a booby-trapped murder maze and recording it for a pay feed.",
+    "Using customer data for blackmail.",
+    "A weaponized virus released during corp war spread outside their intended target."
+  ];
+
+  // Hypergrowth: each glyph flickers through random characters and settles
+  // left-to-right - mechanical, fast, transactional.
+  const DECODE_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/<>*-_".split("");
+  function decodeText(el, text) {
+    el.textContent = "";
+    const spans = [...text].map((c) => {
+      const s = document.createElement("span");
+      s.className = "c";
+      s.setAttribute("aria-hidden", "true");
+      s.dataset["o"] = c;              // remember the real ("original") char
+      // Seed with the real character (not blank): the first frame overwrites it
+      // with a random glyph, so the scramble still reads, but if rAF never runs
+      // the text shows correctly instead of empty.
+      s.textContent = c;
+      el.appendChild(s);
+      return s;
+    });
+    const start = performance.now();
+    const frame = (now) => {
+      if (!el.isConnected) return;      // element replaced by a re-render; abandon
+      const t = now - start;
+      let done = true;
+      spans.forEach((s, i) => {
+        const o = s.dataset["o"] ?? "";
+        if (o === " ") return;          // don't scramble spaces
+        if (t < 25 + i * 8) {          // each glyph settles 8ms after the one before
+          s.textContent = DECODE_POOL[Math.floor(Math.random() * DECODE_POOL.length)] ?? o;
+          done = false;
+        } else {
+          s.textContent = o;            // settled: show the real character
+        }
+      });
+      if (!done) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  function pad(n){ return n < 10 ? "0" + n : "" + n; }
+
+  function renderList(el, arr){
+    el.innerHTML = arr.map((t,i)=>
+      `<li data-idx="${i}"><b>${pad(i+1)}.</b>${t}</li>`
+    ).join("");
+  }
+
+  function renderControversy(el, arr){
+    el.innerHTML = arr.map((t,i)=>
+      `<span class="entry" data-idx="${i}"><b>${pad(i+1)}.</b> ${t} </span>`
+    ).join("");
+  }
+
+  renderList(document.getElementById("listOne"), partOne);
+  renderList(document.getElementById("listTwo"), partTwo);
+  renderList(document.getElementById("listIndustry"), industry);
+  renderControversy(document.getElementById("controversyBlock"), controversy);
+
+  function clearHits(container){
+    container.querySelectorAll(".hit").forEach(n=>n.classList.remove("hit"));
+  }
+
+  function rollOne(containerId, arr){
+    const container = document.getElementById(containerId);
+    clearHits(container);
+    const idx = Math.floor(Math.random()*arr.length);
+    const target = container.querySelector(`[data-idx="${idx}"]`);
+    target.classList.add("hit");
+    return { idx, value: arr[idx] };
+  }
+
+  const state = { one:null, two:null, industry:null, controversy:null };
+
+  document.querySelectorAll("[data-roll]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const which = btn.getAttribute("data-roll");
+      if(which === "one") state.one = rollOne("listOne", partOne);
+      if(which === "two") state.two = rollOne("listTwo", partTwo);
+      if(which === "industry") state.industry = rollOne("listIndustry", industry);
+      if(which === "controversy") state.controversy = rollOne("controversyBlock", controversy);
+      updateReadout();
+    });
+  });
+
+  function updateReadout(){
+    const nameEl = document.getElementById("readoutName");
+    const industryEl = document.getElementById("readoutIndustry");
+    const controversyEl = document.getElementById("readoutControversy");
+    const name = (state.one && state.two) ? `${state.one.value} ${state.two.value}` : null;
+
+    decodeText(nameEl, name ? name.toUpperCase() : "No corporation on file yet.");
+    decodeText(industryEl, state.industry ? `Industry: ${state.industry.value}` : "");
+    decodeText(controversyEl, state.controversy ? `Controversy: ${state.controversy.value}` : "");
+  }
+
+  document.getElementById("rollAll").addEventListener("click", ()=>{
+    state.one = rollOne("listOne", partOne);
+    state.two = rollOne("listTwo", partTwo);
+    state.industry = rollOne("listIndustry", industry);
+    state.controversy = rollOne("controversyBlock", controversy);
+    updateReadout();
+    decodeText(document.getElementById("titleLine1"), "Corporation");
+    decodeText(document.getElementById("titleLine2"), "Generator");
+  });
+})();
+</script>
+
+</body>
+</html>
