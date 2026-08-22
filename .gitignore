@@ -18,3 +18,7 @@
 # scratch
 _repo/
 *.bak
+
+# vendored fonts are code, not media
+!fonts/
+!fonts/*.woff2

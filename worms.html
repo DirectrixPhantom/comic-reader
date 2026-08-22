@@ -3,16 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <title>Worms</title>
-<meta property="og:type" content="website">
-<meta property="og:title" content="Worms">
-<meta property="og:image" content="https://snade-g1.nekoweb.org/worms/main/worms-001.webp">
-<meta property="og:url" content="https://snade-g1.nekoweb.org/worms.html">
-<meta property="og:site_name" content="Snadiya">
-<meta name="twitter:card" content="summary_large_image">
 
 
 <!-- =====================================================================
@@ -22,6 +13,39 @@
      ===================================================================== -->
 
 <style>
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/Literata-600.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/SourceSans3-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/SourceSans3-600.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/SourceSans3-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
   :root{
     --bg:#1e1b2c; --surface:#393047; --surface-2:#5a356a; --sep:rgba(236,193,194,.42);
     --text:#ecc1c2; --text-2:#cda6b5; --amber:#f49c58; --amber-dk:#1e1b2c; --tint:#f49c58; --rose:#ecc1c2; --orange:#f49c58; --crimson:#c07184; --plum:#67264f; --violet:#5a356a; --ink:#1e1b2c;
@@ -207,7 +231,7 @@
 <!-- ====================== EDIT ONLY THIS BLOCK ====================== -->
 <script>
 window.CONFIG = { title:"Worms", artist:"Snadiya", artistSite:"https://linktr.ee/snadiya", gallery:"index.html", base:"https://snade-g1.nekoweb.org/", endText:"The End", ogImage:"worms/main/worms-001.webp", driveUrl:"https://drive.google.com/drive/folders/1bVjkJFyb0rDvO6lZSW0Hbfm6tZv2Nqg8",
- chapters:[{ title:"Worms", folder:"worms/main/", prefix:"worms-", pad:3, ext:"webp", from:1, to:21 },{ title:"Renders", folder:"worms/packs/", prefix:"render-", pad:3, ext:"webp", from:1, to:130, grid:{cols:10,swap:true} }], dims:[[1300,1920],[1300,1920],[1920,1300],[1920,1300],[1920,1300],[1920,1300],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1920,1300],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1920,1300],[1920,1300],[1920,1300],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920]] };
+ chapters:[{ title:"Worms", folder:"worms/main/", prefix:"worms-", pad:3, ext:"webp", from:1, to:21 },{ title:"Series A", folder:"worms/a/", prefix:"render-", pad:3, ext:"webp", from:1, to:60, grid:{cols:10,swap:true} },{ title:"Series B", folder:"worms/b/", prefix:"render-", pad:3, ext:"webp", from:1, to:60, grid:{cols:10,swap:true} },{ title:"Pack 07", folder:"worms/c/", prefix:"render-", pad:3, ext:"webp", from:1, to:10 }], dims:[[1300,1920],[1300,1920],[1920,1300],[1920,1300],[1920,1300],[1920,1300],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1920,1300],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1920,1300],[1920,1300],[1920,1300],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920],[1920,1920]] };
 </script>
 <!-- ================================================================== -->
 
@@ -664,7 +688,9 @@ window.CONFIG = { title:"Worms", artist:"Snadiya", artistSite:"https://linktr.ee
   vp.addEventListener("wheel",wheelZoom,{passive:false});
   stage.addEventListener("scroll",function(){ syncEdges(); },{passive:true});
   stage.addEventListener("wheel",function(e){
-    if(e.ctrlKey){ wheelZoom(e); }
+    if(mode!=="pages"||onCard){ return; }
+    e.preventDefault();
+    setStageZoom(stageZoom*(e.deltaY<0?1.12:1/1.12));
   },{passive:false});
   // wheel over the page scrubber steps through pages; everywhere else the wheel scrolls normally
   zone.addEventListener("wheel",function(e){
