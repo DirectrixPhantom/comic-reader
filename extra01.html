@@ -182,6 +182,9 @@
 
   /* size dial */
   .sizewrap{flex:none;display:flex;align-items:center}
+  .zoomwrap{flex:none;display:flex;align-items:center;margin-right:6px}
+  .zoomwrap .sizebtn .ico{display:inline-flex} .zoomwrap .sizebtn .ico svg{width:16px;height:16px}
+  @media(max-width:520px){ .zoomwrap{display:none} }
   .sizebtn{min-width:40px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
     background:transparent;border:1px solid var(--sep);color:var(--text);cursor:pointer;font-family:var(--font);
     font-size:17px;font-weight:700;touch-action:manipulation}
@@ -300,8 +303,10 @@ window.CONFIG = { title:"Extra Pack 01", artist:"Snadiya", artistSite:"https://l
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
     </div>
-    <button id="zOut" class="btn" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
-    <button id="zIn" class="btn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
+    <div class="zoomwrap" role="group" aria-label="Zoom">
+      <button class="sizebtn" id="zOut" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
+      <button class="sizebtn" id="zIn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
+    </div>
     <div class="sizewrap" role="group" aria-label="Reading size">
       <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
       <span id="countTxt">1 / 1</span>

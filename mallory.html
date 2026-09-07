@@ -178,6 +178,9 @@
 
   /* size dial */
   .sizewrap{flex:none;display:flex;align-items:center}
+  .zoomwrap{flex:none;display:flex;align-items:center;margin-right:6px}
+  .zoomwrap .sizebtn .ico{display:inline-flex} .zoomwrap .sizebtn .ico svg{width:16px;height:16px}
+  @media(max-width:520px){ .zoomwrap{display:none} }
   .sizebtn{min-width:40px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
     background:transparent;border:1px solid var(--sep);color:var(--text);cursor:pointer;font-family:var(--font);
     font-size:17px;font-weight:700;touch-action:manipulation}
@@ -245,7 +248,7 @@
 
 <!-- ====================== EDIT ONLY THIS BLOCK ====================== -->
 <script>
-window.CONFIG = { title:"Mallory Mummification Machine", artist:"Snadiya", artistSite:"https://linktr.ee/snadiya", gallery:"index.html", base:"https://snade-g1.nekoweb.org/", endText:"The End", ogImage:"mallory/mallory-001.webp", driveUrl:"https://drive.google.com/drive/folders/11VAFTxWHrOw00RrhOfcF3231DDcjYNeE", related:[{title:"Camera 1 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-01.webp", external:true},{title:"Camera 2 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-02.webp", external:true},{title:"Camera 3 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-03.webp", external:true},{title:"Camera 4 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-04.webp", external:true},{title:"Camera 5 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-05.webp", external:true},{title:"Camera 6 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-06.webp", external:true},{title:"Camera 7 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-07.webp", external:true},{title:"Camera 8 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-08.webp", external:true}],
+window.CONFIG = { title:"Mallory Mummification Machine", artist:"Snadiya", artistSite:"https://linktr.ee/snadiya", gallery:"index.html", base:"https://snade-g1.nekoweb.org/", endText:"The End", ogImage:"mallory/mallory-001.webp", driveUrl:"https://drive.google.com/drive/folders/11VAFTxWHrOw00RrhOfcF3231DDcjYNeE",
  chapters:[{ title:"Event 1", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:1, to:8 },{ title:"Event 2", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:9, to:16 },{ title:"Event 3", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:17, to:24 },{ title:"Event 4", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:25, to:32 },{ title:"Camera strips", folder:"mallory/strips/", prefix:"camera-", pad:2, ext:"webp", from:1, to:8 }], dims:[[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920]] };
 </script>
 <!-- ================================================================== -->
@@ -295,8 +298,10 @@ window.CONFIG = { title:"Mallory Mummification Machine", artist:"Snadiya", artis
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
     </div>
-    <button id="zOut" class="btn" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
-    <button id="zIn" class="btn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
+    <div class="zoomwrap" role="group" aria-label="Zoom">
+      <button class="sizebtn" id="zOut" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
+      <button class="sizebtn" id="zIn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
+    </div>
     <div class="sizewrap" role="group" aria-label="Reading size">
       <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
       <span id="countTxt">1 / 1</span>
