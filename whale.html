@@ -94,15 +94,6 @@
   @media(max-width:620px){ #backBtn .lab{display:none} }
 
   .titlewrap{flex:1;min-width:0;position:relative}
-  #chapBar{display:flex;gap:4px;align-items:center;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;
-    scrollbar-width:none;-ms-overflow-style:none}
-  #chapBar::-webkit-scrollbar{display:none}
-  #chapBar button{flex:none;min-height:36px;padding:0 10px;border-radius:6px;border:1px solid transparent;
-    background:transparent;color:var(--text-2);font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
-  #chapBar button:hover{background:var(--surface-2);color:var(--text)}
-  #chapBar button[aria-current="true"]{color:var(--amber);border-color:var(--sep);background:var(--surface-2)}
-  @media(max-width:820px){ #chapBar{display:none} }
-  @media(min-width:821px){ .titlewrap{flex:none;max-width:40%} }
   #titleBtn{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px;
     background:transparent;border:0;color:var(--text);cursor:pointer;font-family:var(--font);font-size:18px;
     font-weight:600;letter-spacing:-.02em;touch-action:manipulation}
@@ -185,9 +176,6 @@
 
   /* size dial */
   .sizewrap{flex:none;display:flex;align-items:center}
-  .zoomwrap{flex:none;display:flex;align-items:center;margin-right:6px}
-  .zoomwrap .sizebtn .ico{display:inline-flex} .zoomwrap .sizebtn .ico svg{width:16px;height:16px}
-  @media(max-width:520px){ .zoomwrap{display:none} }
   .sizebtn{min-width:40px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
     background:transparent;border:1px solid var(--sep);color:var(--text);cursor:pointer;font-family:var(--font);
     font-size:17px;font-weight:700;touch-action:manipulation}
@@ -950,7 +938,6 @@ window.CONFIG = {
 <div class="shell" id="shell" data-mode="pages">
   <div id="topnav">
     <button id="backBtn"><span class="ico" data-i="nav-arrow-left"></span><span class="lab">All comics</span></button>
-    <div id="chapBar" role="group" aria-label="Chapters"></div>
     <div class="titlewrap">
       <button id="titleBtn" aria-expanded="false" aria-controls="chapMenu"><b>Comic</b><span class="caret ico" data-i="chev-down"></span></button>
       <div class="pop" id="chapMenu" role="menu"></div>
@@ -991,10 +978,6 @@ window.CONFIG = {
     <div id="scrubZone" role="slider" tabindex="0" aria-label="Jump to page" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1">
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
-    </div>
-    <div class="zoomwrap" role="group" aria-label="Zoom">
-      <button class="sizebtn" id="zOut" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
-      <button class="sizebtn" id="zIn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
     </div>
     <div class="sizewrap" role="group" aria-label="Reading size">
       <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
@@ -1124,23 +1107,6 @@ window.CONFIG = {
       '<a href="'+C.artistSite+'" target="_blank" rel="noopener"><span class="ico" data-i="view-grid"></span>More by '+C.artist+'</a></div>';
     paintIcons(e);return e;
   }
-  function buildChapBar(){
-    var bar=document.getElementById("chapBar"); if(!bar){ return; }
-    bar.innerHTML="";
-    if(!MULTI){ bar.style.display="none"; return; }
-    CHAPTERS.forEach(function(ch){
-      var b=document.createElement("button");b.type="button";b.textContent=ch.title;
-      b.addEventListener("click",function(){ go(ch.from); });
-      bar.appendChild(b); ch.barEl=b;
-    });
-  }
-  function syncChapBar(){
-    if(!MULTI){ return; }
-    var i=currentIndex();
-    CHAPTERS.forEach(function(ch){
-      if(ch.barEl){ ch.barEl.setAttribute("aria-current", (i>=ch.from&&i<=ch.to)?"true":"false"); }
-    });
-  }
   function buildChapMenu(){
     var m=document.getElementById("chapMenu"),tb=document.getElementById("titleBtn");
     if(!HASMENU){ tb.classList.add("static"); tb.querySelector(".caret").style.display="none"; return; }
@@ -1149,7 +1115,7 @@ window.CONFIG = {
       CHAPTERS.forEach(function(ch){
         var b=document.createElement("button");b.className="btn chapitem";b.type="button";
         b.innerHTML='<span>'+ch.title+'</span><span class="rng">'+(ch.from+1)+'–'+(ch.to+1)+'</span>';
-        b.addEventListener("click",function(){ go(ch.from);closeAllPops();toast(ch.title); });
+        b.addEventListener("click",function(){ go(ch.from);closeAllPops(); });
         m.appendChild(b);ch.menuEl=b;
       });
     }
@@ -1182,7 +1148,7 @@ window.CONFIG = {
     for(var i=0;i<nodes.length;i++){ if(nodes[i].offsetTop<=mid){b=i;}else{break;} } return b; }
   function currentIndex(){ return mode==="pages"?page:scrollIndex(); }
 
-  function syncNav(){ syncChapBar();
+  function syncNav(){
     var i=currentIndex(),ci=PAGES[i].chapter;
     if(MULTI){ CHAPTERS.forEach(function(ch,n){ if(ch.menuEl){ ch.menuEl.setAttribute("aria-current",n===ci?"true":"false"); } }); }
     if(onCard){ document.getElementById("countTxt").textContent = onCard.isEnd ? "—" : "Preview"; }
@@ -1341,8 +1307,6 @@ window.CONFIG = {
     renderHelp();
     if(autoIdx>0){ scheduleAuto(); }
   }
-  document.getElementById("zIn").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom*1.25);}else{setStageZoom(stageZoom*1.25);}});
-  document.getElementById("zOut").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom/1.25);}else{setStageZoom(stageZoom/1.25);}});
   document.getElementById("mScroll").addEventListener("click",function(e){e.stopPropagation();setMode("scroll");});
   document.getElementById("mPages").addEventListener("click",function(e){e.stopPropagation();setMode("pages");});
 
@@ -1410,7 +1374,7 @@ window.CONFIG = {
 
   function setStripZoom(z,anchorY){ var prev=stripZoom;z=Math.max(1,Math.min(4,z)); if(z===prev){return;}
     var a=(anchorY==null?vp.clientHeight/2:anchorY),before=vp.scrollTop+a;stripZoom=z;layer.style.transform="scale("+z+")";layer.style.width=(100/z)+"%";
-    vp.scrollTop=before*(z/prev)-a;toast(z===1?"Zoom reset":"Zoom "+z.toFixed(1)+"x"); }
+    vp.scrollTop=before*(z/prev)-a; }
   function wheelZoom(e){
     if(!e.ctrlKey){ return; }
     e.preventDefault();
@@ -1496,8 +1460,7 @@ window.CONFIG = {
       st.scrollLeft=before.x*r-st.clientWidth/2;
       st.scrollTop=before.y*r-st.clientHeight/2;
     }
-    syncZoomCursor();
-    toast(stageZoom===1?"Zoom reset":"Zoom "+stageZoom.toFixed(1)+"x"); }
+    syncZoomCursor(); }
 
   /* ---- grid navigation: left/right = one step, up/down = one row ---- */
   function gridInfo(){
@@ -1513,9 +1476,6 @@ window.CONFIG = {
     var t=g.local+delta;
     if(t<0||t>=g.span){ return false; }
     go(g.c.from+t); syncEdges();
-    var n=gridInfo();
-    if(n){ toast((n.c.grid&&n.c.grid.swap? "Angle "+(n.col+1)+" / "+n.cols+"  Step "+(n.row+1)+" / "+n.rows
-                                          : "Row "+(n.row+1)+" / "+n.rows+"  Col "+(n.col+1)+" / "+n.cols)); }
     return true;
   }
   function gridVertical(d){
@@ -1566,7 +1526,7 @@ window.CONFIG = {
 
   /* ---------- boot ---------- */
   paintIcons(document);
-  buildScroll();buildChapMenu();buildChapBar();buildThumbs();placeTicks();
+  buildScroll();buildChapMenu();buildThumbs();placeTicks();
   var savedPos=rd(K_POS,null); if(savedPos&&typeof savedPos.i==="number"){ page=Math.min(TOTAL-1,Math.max(0,savedPos.i)); }
   var savedMode=rd(K_MODE,(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||navigator.maxTouchPoints>0?"scroll":"pages"); var s0=savedMode==="pages"?sPages:sScroll;
   fit=s0.fit!==false;tapAdvance=!!s0.tapAdvance;
