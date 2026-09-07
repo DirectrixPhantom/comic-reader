@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
 <title>PT: Packaged Traveler</title>
+<meta name="author" content="Snadiya">
 <meta property="og:type" content="website">
 <meta property="og:title" content="PT: Packaged Traveler">
 <meta property="og:image" content="https://snade-comics-b-1.neocities.org/g4/panel_001.jpg">
@@ -143,6 +144,10 @@
     background:var(--surface);border:1px solid var(--sep);border-radius:6px;pointer-events:none;opacity:.9}
   .edge.on{display:flex}
   #edgeUp{top:6px} #edgeDown{bottom:6px}
+  .failed{max-width:min(100%,var(--measure));padding:28px 24px;text-align:center;color:var(--text-2);
+    background:var(--surface);border:1px solid var(--sep);border-radius:10px}
+  .failed p{margin:0 0 10px;color:var(--text);font-size:16px}
+  .failed code{display:block;margin:0 0 14px;font-size:12px;word-break:break-all;color:var(--text-2)}
   #stage.loading::after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;
     border:2px solid var(--sep);border-top-color:var(--tint);border-radius:50%;animation:spin .8s linear infinite}
 
@@ -437,7 +442,7 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
   }
   function buildChapBar(){
     var bar=document.getElementById("chapBar"); if(!bar){ return; }
-    bar.innerHTML="";
+    bar.replaceChildren();
     if(!MULTI){ bar.style.display="none"; shell.classList.remove("haschaps"); return; }
     shell.classList.add("haschaps");
     CHAPTERS.forEach(function(ch){
@@ -456,7 +461,7 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
   function buildChapMenu(){
     var m=document.getElementById("chapMenu"),tb=document.getElementById("titleBtn");
     if(!HASMENU){ tb.classList.add("static"); tb.querySelector(".caret").style.display="none"; return; }
-    m.innerHTML="";
+    m.replaceChildren();
     if(MULTI){
       CHAPTERS.forEach(function(ch){
         var b=document.createElement("button");b.className="btn chapitem";b.type="button";
@@ -520,7 +525,17 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
 
   /* ---------- pages mode ---------- */
   var preloaded={}, PRELOAD_AHEAD=5;
-  function preload(i){ if(i<0||i>=TOTAL||preloaded[i]){return;} var im=new Image();im.decoding="async";im.src=PAGES[i].src;preloaded[i]=im; }
+  function preload(i){
+    if(i<0||i>=TOTAL||preloaded[i]){ return; }
+    var im=new Image(); im.decoding="async"; im.src=PAGES[i].src; preloaded[i]=im;
+  }
+  function trimPreload(){
+    var lo=page-(PRELOAD_AHEAD+3), hi=page+(PRELOAD_AHEAD+3);
+    for(var k in preloaded){
+      var n=+k;
+      if(n<lo||n>hi){ preloaded[n].src=""; delete preloaded[n]; }
+    }
+  }
   function renderPage(){
     onCard=null; shell.classList.remove("oncard");
     stageZoom = SPOT[page] ? 1.5 : 1;
@@ -543,12 +558,24 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
       if(im.decode){ var t=setTimeout(once,120); im.decode().then(function(){clearTimeout(t);once();},function(){clearTimeout(t);once();}); }
       else { once(); }
     };
-    im.onerror=once;
+    im.onerror=function(){ if(page!==want||onCard){ return; } showFailure(im.src); };
     im.src=PAGES[page].src;
     for(var k=1;k<=PRELOAD_AHEAD;k++){ preload(page+k); }
-    preload(page-1); preload(page-2);
+    preload(page-1); preload(page-2); trimPreload();
     syncNav();
     if(autoSecs>0){ scheduleAuto(); }
+  }
+  function showFailure(src){
+    stage.classList.remove("loading");
+    stage.textContent="";
+    var d=document.createElement("div"); d.className="failed";
+    var h=document.createElement("p"); h.textContent="This page did not load";
+    var u=document.createElement("code"); u.textContent=src;
+    var b=document.createElement("button"); b.className="btn"; b.type="button"; b.textContent="Retry";
+    b.addEventListener("click",function(){ renderPage(); });
+    d.appendChild(h); d.appendChild(u); d.appendChild(b);
+    stage.appendChild(d);
+    syncNav();
   }
   function showCard(c){
     onCard=c; shell.classList.add("oncard"); stage.classList.remove("loading");
@@ -588,17 +615,6 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
     if(mode==="pages"&&SPOT[page]&&!onCard){ base=Math.round(base*2.2); }
     autoTimer=setTimeout(function(){ if(!(autoSecs>0)){return;} step(1); scheduleAuto(); }, base);
   }
-  function tickAuto(){
-    if(autoIdx===0){return;}
-    if(mode==="pages"){
-      if(onCard && onCard.isEnd){ setAuto(0); return; }   // reached the end — stop
-      step(1);                                            // step() reschedules
-    } else {
-      if(vp.scrollTop>=maxScroll()-4){ setAuto(0); return; }
-      vp.scrollBy({top:vp.clientHeight*0.85,behavior:"smooth"});
-      scheduleAuto();
-    }
-  }
   function setAuto(v){
     autoSecs=Math.max(0,Number(v)||0); autoIdx=autoSecs>0?1:0;
     var el=document.getElementById("autoSecs"); if(el&&Number(el.value)!==autoSecs){ el.value=autoSecs; }
@@ -635,7 +651,7 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
   document.getElementById("autoSecs").addEventListener("click",function(e){ e.stopPropagation(); });
 
   /* ---------- mode ---------- */
-  function setMode(m){ if(m!=="pages"){ killPanzoom(); }
+  function setMode(m){
     if(m===mode){return;} var carry=currentIndex();
     mode=m;shell.setAttribute("data-mode",m);
     if(m!=="pages"){ onCard=null; shell.classList.remove("oncard"); }
@@ -770,8 +786,6 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
     if(i!==currentIndex()){ go(i); }
   },{passive:false});
   /* ---- zoom + pan (Panzoom, vendored; degrades to plain scale if absent) ---- */
-  var pz=null;
-  function killPanzoom(){ if(pz){ try{pz.destroy();}catch(_){} pz=null; } }
   var fitW=0;
   function measureFit(im){
     im.style.maxWidth=""; im.style.maxHeight=""; im.style.width=""; im.style.height="";
@@ -789,7 +803,6 @@ window.CONFIG = { title:"PT: Packaged Traveler", artist:"Snadiya", artistSite:"h
     }
     syncEdges();
   }
-  function attachPanzoom(im){ measureFit(im); applyZoom(); syncZoomCursor(); }
   function syncZoomCursor(){ var im=stage.querySelector("img"); if(im){ im.style.cursor = stageZoom>1.01?"grab":"auto"; } }
   function setStageZoom(z){ if(onCard){return;}
     var prev=stageZoom;
