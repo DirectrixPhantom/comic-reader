@@ -94,6 +94,15 @@
   @media(max-width:620px){ #backBtn .lab{display:none} }
 
   .titlewrap{flex:1;min-width:0;position:relative}
+  #chapBar{display:flex;gap:4px;align-items:center;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:none;-ms-overflow-style:none}
+  #chapBar::-webkit-scrollbar{display:none}
+  #chapBar button{flex:none;min-height:36px;padding:0 10px;border-radius:6px;border:1px solid transparent;
+    background:transparent;color:var(--text-2);font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+  #chapBar button:hover{background:var(--surface-2);color:var(--text)}
+  #chapBar button[aria-current="true"]{color:var(--amber);border-color:var(--sep);background:var(--surface-2)}
+  @media(max-width:820px){ #chapBar{display:none} }
+  @media(min-width:821px){ .titlewrap{flex:none;max-width:40%} }
   #titleBtn{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px;
     background:transparent;border:0;color:var(--text);cursor:pointer;font-family:var(--font);font-size:18px;
     font-weight:600;letter-spacing:-.02em;touch-action:manipulation}
@@ -123,6 +132,12 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   #stage{position:absolute;inset:0;display:flex;align-items:safe center;justify-content:safe center;padding:14px;overflow:auto;overscroll-behavior:contain}
   #titleBtn b,.card .big,.endwrap h2,#peekChap{font-family:var(--font-head);font-weight:600}
+  #stage img.slide-right,#stage img.slide-left,#stage img.slide-down,#stage img.slide-up{
+    opacity:0;transition:transform .18s cubic-bezier(.2,.8,.3,1),opacity .18s}
+  #stage img.slide-right{transform:translateX(36px)} #stage img.slide-left{transform:translateX(-36px)}
+  #stage img.slide-down{transform:translateY(36px)}  #stage img.slide-up{transform:translateY(-36px)}
+  #stage img.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){ #stage img.slide-right,#stage img.slide-left,#stage img.slide-down,#stage img.slide-up{transition:none;opacity:1;transform:none} }
   #stage img{display:block;max-width:min(100%,var(--measure));max-height:100%;width:auto;height:auto;transform-origin:center center}
   .edge{position:absolute;left:50%;transform:translateX(-50%);z-index:20;width:34px;height:22px;
     display:none;align-items:center;justify-content:center;color:var(--amber);
@@ -175,7 +190,9 @@
   #peek .chap{display:block;font-size:15px;font-weight:400;color:var(--text-2);margin-top:1px}
 
   /* size dial */
-  .sizewrap{flex:none;display:flex;align-items:center}
+  .zoomwrap{flex:none;display:flex;align-items:center;margin-right:6px}
+  .zoomwrap .sizebtn .ico{display:inline-flex} .zoomwrap .sizebtn .ico svg{width:16px;height:16px}
+  @media(max-width:520px){ .zoomwrap{display:none} }
   .sizebtn{min-width:40px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
     background:transparent;border:1px solid var(--sep);color:var(--text);cursor:pointer;font-family:var(--font);
     font-size:17px;font-weight:700;touch-action:manipulation}
@@ -185,7 +202,6 @@
   #countTxt{flex:none;font-size:16px;font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;
     min-width:64px;text-align:center;padding:0 4px}
   @media(max-width:560px){ #countTxt{min-width:52px;font-size:15px} }
-  @media(max-width:420px){ .sizewrap{display:none} }
 
   .popwrap{position:relative;flex:none}
   .pop{position:absolute;background:var(--surface);border:1px solid var(--sep);padding:6px;display:none;flex-direction:column;gap:1px;
@@ -251,6 +267,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
 <div class="shell" id="shell" data-mode="pages">
   <div id="topnav">
     <button id="backBtn"><span class="ico" data-i="nav-arrow-left"></span><span class="lab">All comics</span></button>
+    <div id="chapBar" role="group" aria-label="Chapters"></div>
     <div class="titlewrap">
       <button id="titleBtn" aria-expanded="false" aria-controls="chapMenu"><b>Comic</b><span class="caret ico" data-i="chev-down"></span></button>
       <div class="pop" id="chapMenu" role="menu"></div>
@@ -269,9 +286,8 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
         <div class="lbl">Brightness</div>
         <div class="sliderrow"><input id="bright" type="range" min="30" max="100" value="100" aria-label="Brightness"><span id="brightVal">100%</span></div>
         <div class="sep"></div>
-        <button class="btn" id="oAuto" aria-pressed="false">Auto-forward: Off</button>
+        <div class="sliderrow"><label for="autoSecs">Auto-forward</label><input id="autoSecs" type="number" min="0" step="0.5" value="0" inputmode="decimal"><span class="unit">s</span></div>
         <button class="btn" id="oFit" aria-pressed="true">Fit page to screen</button>
-        <button class="btn" id="oTap" aria-pressed="false">Tap to advance</button>
         <button class="btn" id="oFull"><span class="ico" data-i="expand"></span>Fullscreen</button>
         <button class="btn" id="oHelp">Keyboard shortcuts</button>
       </div>
@@ -292,11 +308,11 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       <div id="track"><div id="fill"></div><div id="knob"></div></div>
       <div id="peek"><img id="peekImg" alt=""><div class="cap"><span id="peekNum">1</span><span class="chap" id="peekChap"></span></div></div>
     </div>
-    <div class="sizewrap" role="group" aria-label="Reading size">
-      <button class="sizebtn minus" id="sizeDown" aria-label="Smaller"><span class="sm">A</span>−</button>
-      <span id="countTxt">1 / 1</span>
-      <button class="sizebtn" id="sizeUp" aria-label="Bigger"><span class="lg">A</span>+</button>
+    <div class="zoomwrap" role="group" aria-label="Zoom">
+      <button class="sizebtn" id="zOut" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
+      <button class="sizebtn" id="zIn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
     </div>
+    <span id="countTxt">1 / 1</span>
     <button class="btn filled" id="nextBtn"><span class="lab">Next</span><span class="ico" data-i="nav-arrow-right"></span></button>
   </div>
 </div>
@@ -374,17 +390,16 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       track=document.getElementById("track"),peek=document.getElementById("peek");
   zone.setAttribute("aria-valuemax",String(TOTAL));
 
-  var mode="pages",page=0,onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,tapAdvance=false,stageZoom=1,stripZoom=1,zscroll=0;
+  var mode="pages",page=0,onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,stageZoom=1,stripZoom=1,zscroll=0;
   var WHEEL_NOTCH=30;
-  var autoIdx=0,autoTimer=null,AUTO=[0,6000,4000,2500],AUTOLBL=["Off","Slow","Medium","Fast"];
+  var autoIdx=0,autoSecs=0,autoTimer=null;
 
   /* size dial */
-  var WIDTHS=[560,720,900,1100,1400], WLABEL=["Snug","Comfy","Roomy","Wide","Extra wide"];
 
   var K_POS=KEY+":pos",K_MODE=KEY+":mode",K_MARKS=KEY+":marks",K_SCROLL=KEY+":s-scroll",K_PAGES=KEY+":s-pages";
   function rd(k,d){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;} }
   function wr(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
-  var sScroll=rd(K_SCROLL,{tapAdvance:false,measure:900}),sPages=rd(K_PAGES,{fit:true,measure:900});
+  var sScroll=rd(K_SCROLL,{measure:900}),sPages=rd(K_PAGES,{fit:true,measure:900});
   marks=rd(K_MARKS,[])||[];
   function cur(){ return mode==="pages"?sPages:sScroll; }
   function saveCur(){ wr(mode==="pages"?K_PAGES:K_SCROLL,cur()); }
@@ -420,6 +435,23 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       '<a href="'+C.artistSite+'" target="_blank" rel="noopener"><span class="ico" data-i="view-grid"></span>More by '+C.artist+'</a></div>';
     paintIcons(e);return e;
   }
+  function buildChapBar(){
+    var bar=document.getElementById("chapBar"); if(!bar){ return; }
+    bar.innerHTML="";
+    if(!MULTI){ bar.style.display="none"; return; }
+    CHAPTERS.forEach(function(ch){
+      var b=document.createElement("button");b.type="button";b.textContent=ch.title;
+      b.addEventListener("click",function(){ go(ch.from); });
+      bar.appendChild(b); ch.barEl=b;
+    });
+  }
+  function syncChapBar(){
+    if(!MULTI){ return; }
+    var i=currentIndex();
+    CHAPTERS.forEach(function(ch){
+      if(ch.barEl){ ch.barEl.setAttribute("aria-current", (i>=ch.from&&i<=ch.to)?"true":"false"); }
+    });
+  }
   function buildChapMenu(){
     var m=document.getElementById("chapMenu"),tb=document.getElementById("titleBtn");
     if(!HASMENU){ tb.classList.add("static"); tb.querySelector(".caret").style.display="none"; return; }
@@ -428,7 +460,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       CHAPTERS.forEach(function(ch){
         var b=document.createElement("button");b.className="btn chapitem";b.type="button";
         b.innerHTML='<span>'+ch.title+'</span><span class="rng">'+(ch.from+1)+'–'+(ch.to+1)+'</span>';
-        b.addEventListener("click",function(){ go(ch.from);closeAllPops(); });
+        b.addEventListener("click",function(){ go(ch.from);closeAllPops();toast(ch.title); });
         m.appendChild(b);ch.menuEl=b;
       });
     }
@@ -461,11 +493,17 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     for(var i=0;i<nodes.length;i++){ if(nodes[i].offsetTop<=mid){b=i;}else{break;} } return b; }
   function currentIndex(){ return mode==="pages"?page:scrollIndex(); }
 
-  function syncNav(){
+  function posLabel(i){
+    var base=(i+1)+" / "+TOTAL;
+    if(!MULTI){ return base; }
+    var c=CHAPTERS[PAGES[i].chapter];
+    return base+"  "+c.title+" "+(i-c.from+1)+"/"+(c.to-c.from+1);
+  }
+  function syncNav(){ syncChapBar();
     var i=currentIndex(),ci=PAGES[i].chapter;
     if(MULTI){ CHAPTERS.forEach(function(ch,n){ if(ch.menuEl){ ch.menuEl.setAttribute("aria-current",n===ci?"true":"false"); } }); }
     if(onCard){ document.getElementById("countTxt").textContent = onCard.isEnd ? "—" : "Preview"; }
-    else { document.getElementById("countTxt").textContent=(i+1)+" / "+TOTAL; }
+    else { document.getElementById("countTxt").textContent=posLabel(i); }
     var f=TOTAL>1?i/(TOTAL-1):0;
     document.getElementById("fill").style.width=(f*100)+"%";document.getElementById("knob").style.left=(f*100)+"%";
     zone.setAttribute("aria-valuenow",String(i+1));
@@ -494,6 +532,9 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       if(page!==want||onCard){ return; }
       stage.textContent=""; stage.appendChild(im); stage.scrollTop=0;
       stage.classList.remove("loading");
+      im.classList.add("slide-"+navDir);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ im.classList.add("in"); }); });
+      navDir="right";
       measureFit(im); applyZoom(); syncZoomCursor(); syncEdges();
     }
     im.onload=function(){ if(im.decode){ im.decode().then(swap,swap); } else { swap(); } };
@@ -502,7 +543,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     for(var k=1;k<=PRELOAD_AHEAD;k++){ preload(page+k); }
     preload(page-1); preload(page-2);
     syncNav();
-    if(autoIdx>0){ scheduleAuto(); }
+    if(autoSecs>0){ scheduleAuto(); }
   }
   function showCard(c){
     onCard=c; shell.classList.add("oncard"); stage.classList.remove("loading");
@@ -516,9 +557,9 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       d.querySelector("#cardGo").addEventListener("click",function(){ onCard=null; go(c.after+1); });
     }
     syncNav();
-    if(autoIdx>0){ if(c.isEnd){ setAuto(0); } else { scheduleAuto(); } }
+    if(autoSecs>0){ if(c.isEnd){ setAuto(0); } else { scheduleAuto(); } }
   }
-  function go(i){ if(i<0||i>=TOTAL){return;} page=i;stageZoom=1;
+  function go(i){ if(i<0||i>=TOTAL){return;} if(i>page&&navDir!=="down"&&navDir!=="up"){navDir="right";} else if(i<page&&navDir!=="down"&&navDir!=="up"){navDir="left";} page=i;stageZoom=1;
     if(mode==="pages"){ renderPage(); } else { onCard=null; var n=nodes[i]; if(n){ vp.scrollTo({top:n.offsetTop,behavior:"smooth"}); } } }
   function step(d){
     if(mode==="scroll"){ vp.scrollBy({top:d*vp.clientHeight*0.75,behavior:"smooth"}); return; }
@@ -536,10 +577,11 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
 
   /* ---------- auto-forward ---------- */
   function scheduleAuto(){
-    clearTimeout(autoTimer); if(autoIdx===0){return;}
-    var base=AUTO[autoIdx];
-    if(mode==="pages" && SPOT[page] && !onCard){ base=Math.round(base*2.2); } // linger on spotlight pages
-    autoTimer=setTimeout(tickAuto,base);
+    clearTimeout(autoTimer);
+    if(!(autoSecs>0)){ return; }
+    var base=autoSecs*1000;
+    if(mode==="pages"&&SPOT[page]&&!onCard){ base=Math.round(base*2.2); }
+    autoTimer=setTimeout(function(){ if(!(autoSecs>0)){return;} step(1); scheduleAuto(); }, base);
   }
   function tickAuto(){
     if(autoIdx===0){return;}
@@ -552,13 +594,11 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       scheduleAuto();
     }
   }
-  function setAuto(idx){
-    autoIdx=idx;
-    var b=document.getElementById("oAuto");
-    b.textContent="Auto-forward: "+AUTOLBL[idx]; b.setAttribute("aria-pressed",String(idx>0));
-    clearTimeout(autoTimer); if(idx>0){ scheduleAuto(); }
+  function setAuto(v){
+    autoSecs=Math.max(0,Number(v)||0); autoIdx=autoSecs>0?1:0;
+    var el=document.getElementById("autoSecs"); if(el&&Number(el.value)!==autoSecs){ el.value=autoSecs; }
+    if(autoSecs>0){ scheduleAuto(); } else { clearTimeout(autoTimer); }
   }
-  document.getElementById("oAuto").addEventListener("click",function(e){ e.stopPropagation(); setAuto((autoIdx+1)%AUTO.length); toast("Auto-forward: "+AUTOLBL[autoIdx]); });
 
   /* ---------- scrubber ---------- */
   var liveS=false,previewIdx=0;
@@ -572,7 +612,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
   }
   function previewTo(i,x){ previewIdx=i; var f=TOTAL>1?i/(TOTAL-1):0;
     document.getElementById("fill").style.width=(f*100)+"%";document.getElementById("knob").style.left=(f*100)+"%";
-    document.getElementById("countTxt").textContent=(i+1)+" / "+TOTAL;showPeek(i,x); }
+    document.getElementById("countTxt").textContent=posLabel(i);showPeek(i,x); }
   function endScrub(){ if(!liveS){return;} liveS=false;zone.classList.remove("live");peek.classList.remove("on");go(previewIdx); }
   zone.addEventListener("pointerdown",function(e){ e.stopPropagation();liveS=true;zone.classList.add("live");zone.setPointerCapture(e.pointerId);previewTo(idxFromX(e.clientX),e.clientX); });
   zone.addEventListener("pointermove",function(e){ if(liveS){ previewTo(idxFromX(e.clientX),e.clientX); } });
@@ -586,24 +626,12 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     else if(e.key==="End"){e.preventDefault();e.stopPropagation();go(TOTAL-1);} });
 
   /* ---------- size dial ---------- */
-  function nearestWidthIndex(w){ var best=0,bd=1e9; WIDTHS.forEach(function(x,k){ var dd=Math.abs(x-w); if(dd<bd){bd=dd;best=k;} }); return best; }
   function applySize(idx,persist){
     idx=Math.max(0,Math.min(WIDTHS.length-1,idx));
     var w=WIDTHS[idx]; shell.style.setProperty("--measure",w+"px");
-    document.getElementById("sizeDown").disabled=(idx===0);
-    document.getElementById("sizeUp").disabled=(idx===WIDTHS.length-1);
     if(persist){ cur().measure=w;saveCur(); }
     return idx;
   }
-  function stepSize(d){
-    var keep=currentIndex();
-    var idx=nearestWidthIndex(cur().measure||900)+d;
-    idx=applySize(idx,true);
-    toast(WLABEL[idx]+" — "+WIDTHS[idx]+" px");
-    if(mode==="scroll"){ void vp.offsetHeight; if(nodes[keep]){vp.scrollTop=nodes[keep].offsetTop;} syncNav(); }
-  }
-  document.getElementById("sizeDown").addEventListener("click",function(e){e.stopPropagation();stepSize(-1);});
-  document.getElementById("sizeUp").addEventListener("click",function(e){e.stopPropagation();stepSize(1);});
 
   /* ---------- mode ---------- */
   function setMode(m){ if(m!=="pages"){ killPanzoom(); }
@@ -612,14 +640,17 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     if(m!=="pages"){ onCard=null; shell.classList.remove("oncard"); }
     document.getElementById("mScroll").setAttribute("aria-pressed",String(m==="scroll"));
     document.getElementById("mPages").setAttribute("aria-pressed",String(m==="pages"));
-    wr(K_MODE,m); var s=cur(); fit=s.fit!==false;tapAdvance=!!s.tapAdvance;
-    document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
-    document.getElementById("oTap").setAttribute("aria-pressed",String(tapAdvance));
+    wr(K_MODE,m); var s=cur(); fit=s.fit!==false;
+    document.getElementById("autoSecs").addEventListener("input",function(e){ e.stopPropagation(); setAuto(this.value); });
+  document.getElementById("autoSecs").addEventListener("click",function(e){ e.stopPropagation(); });
+  document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
     applySize(nearestWidthIndex(s.measure||900),false);
     if(m==="pages"){ page=carry;stageZoom=1;renderPage(); } else { void vp.offsetHeight; if(nodes[carry]){ vp.scrollTop=nodes[carry].offsetTop; } syncNav(); }
     renderHelp();
-    if(autoIdx>0){ scheduleAuto(); }
+    if(autoSecs>0){ scheduleAuto(); }
   }
+  document.getElementById("zIn").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom*1.25);}else{setStageZoom(stageZoom*1.25);}});
+  document.getElementById("zOut").addEventListener("click",function(e){e.stopPropagation();if(mode==="scroll"){setStripZoom(stripZoom/1.25);}else{setStageZoom(stageZoom/1.25);}});
   document.getElementById("mScroll").addEventListener("click",function(e){e.stopPropagation();setMode("scroll");});
   document.getElementById("mPages").addEventListener("click",function(e){e.stopPropagation();setMode("pages");});
 
@@ -628,7 +659,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
   vp.addEventListener("pointerdown",function(e){dy=e.clientY;dx=e.clientX;dt=Date.now();moved=false;});
   vp.addEventListener("pointermove",function(e){if(Math.abs(e.clientY-dy)>8||Math.abs(e.clientX-dx)>8){moved=true;}});
   vp.addEventListener("scroll",function(){ scrolling=true;clearTimeout(window.__s);window.__s=setTimeout(function(){scrolling=false;},90); },{passive:true});
-  vp.addEventListener("click",function(){ if(mode!=="scroll"||!tapAdvance){return;} if(moved||scrolling||Date.now()-dt>400){return;} step(1); });
+  vp.addEventListener("click",function(){ if(mode!=="scroll"||true){return;} if(moved||scrolling||Date.now()-dt>400){return;} step(1); });
 
   /* ---------- popovers ---------- */
   var optBtn=document.getElementById("optBtn"),opts=document.getElementById("opts"),titleBtn=document.getElementById("titleBtn"),chapMenu=document.getElementById("chapMenu");
@@ -641,7 +672,6 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
 
   document.getElementById("bright").addEventListener("input",function(){ var v=+this.value;shell.style.setProperty("--bright",(v/100).toFixed(2));shell.classList.toggle("dim",v<100);document.getElementById("brightVal").textContent=v+"%"; });
   document.getElementById("oFit").addEventListener("click",function(e){ e.stopPropagation();fit=!fit;this.setAttribute("aria-pressed",String(fit));cur().fit=fit;saveCur();if(mode==="pages"&&!onCard){renderPage();}toast(fit?"Fit page to screen":"Full width"); });
-  document.getElementById("oTap").addEventListener("click",function(e){ e.stopPropagation();tapAdvance=!tapAdvance;this.setAttribute("aria-pressed",String(tapAdvance));cur().tapAdvance=tapAdvance;saveCur();toast(tapAdvance?"Tapping the art advances":"Tapping the art does nothing"); });
 
   /* ---------- sheets ---------- */
   function openSheet(id){ document.querySelectorAll(".sheet").forEach(function(s){s.classList.remove("open");});document.getElementById(id).classList.add("open");closeAllPops(); }
@@ -687,7 +717,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
 
   function setStripZoom(z,anchorY){ var prev=stripZoom;z=Math.max(1,Math.min(4,z)); if(z===prev){return;}
     var a=(anchorY==null?vp.clientHeight/2:anchorY),before=vp.scrollTop+a;stripZoom=z;layer.style.transform="scale("+z+")";layer.style.width=(100/z)+"%";
-    vp.scrollTop=before*(z/prev)-a; }
+    vp.scrollTop=before*(z/prev)-a;toast(z===1?"Zoom reset":"Zoom "+z.toFixed(1)+"x"); }
   function wheelZoom(e){
     if(!e.ctrlKey){ return; }
     e.preventDefault();
@@ -742,7 +772,7 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     if(i!==currentIndex()){ go(i); }
   },{passive:false});
   /* ---- zoom + pan (Panzoom, vendored; degrades to plain scale if absent) ---- */
-  var pz=null;
+  var navDir="right", pz=null;
   function killPanzoom(){ if(pz){ try{pz.destroy();}catch(_){} pz=null; } }
   var fitW=0;
   function measureFit(im){
@@ -773,7 +803,8 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
       st.scrollLeft=before.x*r-st.clientWidth/2;
       st.scrollTop=before.y*r-st.clientHeight/2;
     }
-    syncZoomCursor(); }
+    syncZoomCursor();
+    toast(stageZoom===1?"Zoom reset":"Zoom "+stageZoom.toFixed(1)+"x"); }
 
   /* ---- grid navigation: left/right = one step, up/down = one row ---- */
   function gridInfo(){
@@ -789,11 +820,21 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
     var t=g.local+delta;
     if(t<0||t>=g.span){ return false; }
     go(g.c.from+t); syncEdges();
+    var n=gridInfo();
+    if(n){ toast((n.c.grid&&n.c.grid.swap? "Angle "+(n.col+1)+" / "+n.cols+"  Step "+(n.row+1)+" / "+n.rows
+                                          : "Row "+(n.row+1)+" / "+n.rows+"  Col "+(n.col+1)+" / "+n.cols)); }
     return true;
   }
   function gridVertical(d){
-    var g=gridInfo(); if(!g){ return false; }
-    return gridJump(d*(g.c.grid.swap?1:g.cols));
+    var g=gridInfo();
+    if(g){ return gridJump(d*(g.c.grid.swap?1:g.cols)); }
+    if(mode!=="pages"||onCard||!MULTI){ return false; }
+    var ci=PAGES[page].chapter, c=CHAPTERS[ci], off=page-c.from;
+    var t=ci+d; if(t<0||t>=CHAPTERS.length){ return true; }
+    var n=CHAPTERS[t];
+    navDir=d>0?"down":"up";
+    go(Math.min(n.to, n.from+off));
+    return true;
   }
   function gridHorizontal(d){
     var g=gridInfo(); if(!g||!g.c.grid.swap){ return false; }
@@ -839,12 +880,11 @@ window.CONFIG = { title:"Harley & Poison", artist:"Snadiya", artistSite:"https:/
 
   /* ---------- boot ---------- */
   paintIcons(document);
-  buildScroll();buildChapMenu();buildThumbs();placeTicks();
+  buildScroll();buildChapMenu();buildChapBar();buildThumbs();placeTicks();
   var savedPos=rd(K_POS,null); if(savedPos&&typeof savedPos.i==="number"){ page=Math.min(TOTAL-1,Math.max(0,savedPos.i)); }
   var savedMode=rd(K_MODE,(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||navigator.maxTouchPoints>0?"scroll":"pages"); var s0=savedMode==="pages"?sPages:sScroll;
-  fit=s0.fit!==false;tapAdvance=!!s0.tapAdvance;
+  fit=s0.fit!==false;
   document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
-  document.getElementById("oTap").setAttribute("aria-pressed",String(tapAdvance));
   applySize(nearestWidthIndex(s0.measure||900),false);
   renderMarks();renderHelp();
   if(savedMode==="scroll"){ mode="pages";setMode("scroll"); } else { renderPage(); }
