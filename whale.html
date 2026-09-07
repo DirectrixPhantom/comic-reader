@@ -102,7 +102,7 @@
   #chapBar button:hover{background:var(--surface-2);color:var(--text)}
   #chapBar button[aria-current="true"]{color:var(--amber);border-color:var(--sep);background:var(--surface-2)}
   @media(max-width:820px){ #chapBar{display:none} }
-  @media(min-width:821px){ .titlewrap{flex:none;max-width:40%} }
+  @media(min-width:821px){ .shell.haschaps .titlewrap{flex:none;max-width:40%} }
   #titleBtn{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px;
     background:transparent;border:0;color:var(--text);cursor:pointer;font-family:var(--font);font-size:18px;
     font-weight:600;letter-spacing:-.02em;touch-action:manipulation}
@@ -132,12 +132,15 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   #stage{position:absolute;inset:0;display:flex;align-items:safe center;justify-content:safe center;padding:14px;overflow:auto;overscroll-behavior:contain}
   #titleBtn b,.card .big,.endwrap h2,#peekChap{font-family:var(--font-head);font-weight:600}
-  #stage img.slide-right,#stage img.slide-left,#stage img.slide-down,#stage img.slide-up{
-    opacity:0;transition:transform .18s cubic-bezier(.2,.8,.3,1),opacity .18s}
-  #stage img.slide-right{transform:translateX(36px)} #stage img.slide-left{transform:translateX(-36px)}
-  #stage img.slide-down{transform:translateY(36px)}  #stage img.slide-up{transform:translateY(-36px)}
-  #stage img.in{opacity:1;transform:none}
-  @media (prefers-reduced-motion: reduce){ #stage img.slide-right,#stage img.slide-left,#stage img.slide-down,#stage img.slide-up{transition:none;opacity:1;transform:none} }
+  @keyframes slideR{from{opacity:0;transform:translateX(90px)}to{opacity:1;transform:none}}
+  @keyframes slideL{from{opacity:0;transform:translateX(-90px)}to{opacity:1;transform:none}}
+  @keyframes slideD{from{opacity:0;transform:translateY(90px)}to{opacity:1;transform:none}}
+  @keyframes slideU{from{opacity:0;transform:translateY(-90px)}to{opacity:1;transform:none}}
+  #stage img.slide-right{animation:slideR .34s cubic-bezier(.2,.8,.3,1) both}
+  #stage img.slide-left{animation:slideL .34s cubic-bezier(.2,.8,.3,1) both}
+  #stage img.slide-down{animation:slideD .34s cubic-bezier(.2,.8,.3,1) both}
+  #stage img.slide-up{animation:slideU .34s cubic-bezier(.2,.8,.3,1) both}
+  @media (prefers-reduced-motion: reduce){ #stage img{animation:none !important} }
   #stage img{display:block;max-width:min(100%,var(--measure));max-height:100%;width:auto;height:auto;transform-origin:center center}
   .edge{position:absolute;left:50%;transform:translateX(-50%);z-index:20;width:34px;height:22px;
     display:none;align-items:center;justify-content:center;color:var(--amber);
@@ -999,7 +1002,7 @@ window.CONFIG = {
       <button class="sizebtn" id="zOut" aria-label="Zoom out"><span class="ico" data-i="minus"></span></button>
       <button class="sizebtn" id="zIn" aria-label="Zoom in"><span class="ico" data-i="plus"></span></button>
     </div>
-    <span id="countTxt">1 / 1</span>
+    <span id="countTxt"></span>
     <button class="btn filled" id="nextBtn"><span class="lab">Next</span><span class="ico" data-i="nav-arrow-right"></span></button>
   </div>
 </div>
@@ -1077,7 +1080,7 @@ window.CONFIG = {
       track=document.getElementById("track"),peek=document.getElementById("peek");
   zone.setAttribute("aria-valuemax",String(TOTAL));
 
-  var mode="pages",page=0,onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,stageZoom=1,stripZoom=1,zscroll=0;
+  var mode="pages",page=0,navDir="right",onCard=null,nodes=[],thumbs=[],toastT=null,marks=[],fit=true,stageZoom=1,stripZoom=1,zscroll=0;
   var WHEEL_NOTCH=30;
   var autoIdx=0,autoSecs=0,autoTimer=null;
 
@@ -1086,7 +1089,7 @@ window.CONFIG = {
   var K_POS=KEY+":pos",K_MODE=KEY+":mode",K_MARKS=KEY+":marks",K_SCROLL=KEY+":s-scroll",K_PAGES=KEY+":s-pages";
   function rd(k,d){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;} }
   function wr(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
-  var sScroll=rd(K_SCROLL,{measure:900}),sPages=rd(K_PAGES,{fit:true,measure:900});
+  var sScroll=rd(K_SCROLL,{}),sPages=rd(K_PAGES,{fit:true});
   marks=rd(K_MARKS,[])||[];
   function cur(){ return mode==="pages"?sPages:sScroll; }
   function saveCur(){ wr(mode==="pages"?K_PAGES:K_SCROLL,cur()); }
@@ -1125,7 +1128,8 @@ window.CONFIG = {
   function buildChapBar(){
     var bar=document.getElementById("chapBar"); if(!bar){ return; }
     bar.innerHTML="";
-    if(!MULTI){ bar.style.display="none"; return; }
+    if(!MULTI){ bar.style.display="none"; shell.classList.remove("haschaps"); return; }
+    shell.classList.add("haschaps");
     CHAPTERS.forEach(function(ch){
       var b=document.createElement("button");b.type="button";b.textContent=ch.title;
       b.addEventListener("click",function(){ go(ch.from); });
@@ -1217,15 +1221,19 @@ window.CONFIG = {
     if(!fit){ im.style.maxHeight="none";im.style.width="100%"; }
         function swap(){
       if(page!==want||onCard){ return; }
+      im.classList.add("slide-"+(navDir||"right"));
       stage.textContent=""; stage.appendChild(im); stage.scrollTop=0;
       stage.classList.remove("loading");
-      im.classList.add("slide-"+navDir);
-      requestAnimationFrame(function(){ requestAnimationFrame(function(){ im.classList.add("in"); }); });
       navDir="right";
       measureFit(im); applyZoom(); syncZoomCursor(); syncEdges();
     }
-    im.onload=function(){ if(im.decode){ im.decode().then(swap,swap); } else { swap(); } };
-    im.onerror=swap;
+    var swapped=false;
+    function once(){ if(swapped){return;} swapped=true; swap(); }
+    im.onload=function(){
+      if(im.decode){ var t=setTimeout(once,120); im.decode().then(function(){clearTimeout(t);once();},function(){clearTimeout(t);once();}); }
+      else { once(); }
+    };
+    im.onerror=once;
     im.src=PAGES[page].src;
     for(var k=1;k<=PRELOAD_AHEAD;k++){ preload(page+k); }
     preload(page-1); preload(page-2);
@@ -1312,13 +1320,9 @@ window.CONFIG = {
     else if(e.key==="Home"){e.preventDefault();e.stopPropagation();go(0);}
     else if(e.key==="End"){e.preventDefault();e.stopPropagation();go(TOTAL-1);} });
 
-  /* ---------- size dial ---------- */
-  function applySize(idx,persist){
-    idx=Math.max(0,Math.min(WIDTHS.length-1,idx));
-    var w=WIDTHS[idx]; shell.style.setProperty("--measure",w+"px");
-    if(persist){ cur().measure=w;saveCur(); }
-    return idx;
-  }
+
+  document.getElementById("autoSecs").addEventListener("input",function(e){ e.stopPropagation(); setAuto(this.value); });
+  document.getElementById("autoSecs").addEventListener("click",function(e){ e.stopPropagation(); });
 
   /* ---------- mode ---------- */
   function setMode(m){ if(m!=="pages"){ killPanzoom(); }
@@ -1328,10 +1332,7 @@ window.CONFIG = {
     document.getElementById("mScroll").setAttribute("aria-pressed",String(m==="scroll"));
     document.getElementById("mPages").setAttribute("aria-pressed",String(m==="pages"));
     wr(K_MODE,m); var s=cur(); fit=s.fit!==false;
-    document.getElementById("autoSecs").addEventListener("input",function(e){ e.stopPropagation(); setAuto(this.value); });
-  document.getElementById("autoSecs").addEventListener("click",function(e){ e.stopPropagation(); });
-  document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
-    applySize(nearestWidthIndex(s.measure||900),false);
+    document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
     if(m==="pages"){ page=carry;stageZoom=1;renderPage(); } else { void vp.offsetHeight; if(nodes[carry]){ vp.scrollTop=nodes[carry].offsetTop; } syncNav(); }
     renderHelp();
     if(autoSecs>0){ scheduleAuto(); }
@@ -1459,7 +1460,7 @@ window.CONFIG = {
     if(i!==currentIndex()){ go(i); }
   },{passive:false});
   /* ---- zoom + pan (Panzoom, vendored; degrades to plain scale if absent) ---- */
-  var navDir="right", pz=null;
+  var pz=null;
   function killPanzoom(){ if(pz){ try{pz.destroy();}catch(_){} pz=null; } }
   var fitW=0;
   function measureFit(im){
@@ -1572,7 +1573,6 @@ window.CONFIG = {
   var savedMode=rd(K_MODE,(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||navigator.maxTouchPoints>0?"scroll":"pages"); var s0=savedMode==="pages"?sPages:sScroll;
   fit=s0.fit!==false;
   document.getElementById("oFit").setAttribute("aria-pressed",String(fit));
-  applySize(nearestWidthIndex(s0.measure||900),false);
   renderMarks();renderHelp();
   if(savedMode==="scroll"){ mode="pages";setMode("scroll"); } else { renderPage(); }
   setTimeout(function(){ if(mode==="scroll"){ if(nodes[page]){ vp.scrollTop=nodes[page].offsetTop; } } syncNav(); },60);
