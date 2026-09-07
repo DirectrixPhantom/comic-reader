@@ -239,7 +239,7 @@
 <!-- ====================== EDIT ONLY THIS BLOCK ====================== -->
 <script>
 window.CONFIG = { title:"Mallory Mummification Machine", artist:"Snadiya", artistSite:"https://linktr.ee/snadiya", gallery:"index.html", base:"https://snade-g1.nekoweb.org/", endText:"The End", ogImage:"mallory/mallory-001.webp", driveUrl:"https://drive.google.com/drive/folders/11VAFTxWHrOw00RrhOfcF3231DDcjYNeE", related:[{title:"Camera 1 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-01.webp", external:true},{title:"Camera 2 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-02.webp", external:true},{title:"Camera 3 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-03.webp", external:true},{title:"Camera 4 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-04.webp", external:true},{title:"Camera 5 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-05.webp", external:true},{title:"Camera 6 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-06.webp", external:true},{title:"Camera 7 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-07.webp", external:true},{title:"Camera 8 strip", href:"https://snade-g1.nekoweb.org/mallory/strips/camera-08.webp", external:true}],
- chapters:[{ title:"Mallory", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:1, to:32, grid:{cols:8,swap:true} },{ title:"Camera strips", folder:"mallory/strips/", prefix:"camera-", pad:2, ext:"webp", from:1, to:8 }], dims:[[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920]] };
+ chapters:[{ title:"Angle 1", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:1, to:8 },{ title:"Angle 2", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:9, to:16 },{ title:"Angle 3", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:17, to:24 },{ title:"Angle 4", folder:"mallory/", prefix:"mallory-", pad:3, ext:"webp", from:25, to:32 },{ title:"Camera strips", folder:"mallory/strips/", prefix:"camera-", pad:2, ext:"webp", from:1, to:8 }], dims:[[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[1300,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920],[5200,1920]] };
 </script>
 <!-- ================================================================== -->
 
@@ -695,6 +695,31 @@ window.CONFIG = { title:"Mallory Mummification Machine", artist:"Snadiya", artis
   }
   vp.addEventListener("wheel",wheelZoom,{passive:false});
   stage.addEventListener("scroll",function(){ syncEdges(); },{passive:true});
+  var dragPan=null;
+  stage.addEventListener("pointerdown",function(e){
+    if(stageZoom<=1.01||onCard||mode!=="pages"){ return; }
+    if(stage.scrollWidth<=stage.clientWidth+2&&stage.scrollHeight<=stage.clientHeight+2){ return; }
+    dragPan={x:e.clientX,y:e.clientY,l:stage.scrollLeft,t:stage.scrollTop,id:e.pointerId,moved:false};
+    try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+    var im=stage.querySelector("img"); if(im){ im.style.cursor="grabbing"; }
+    e.preventDefault();
+  });
+  stage.addEventListener("pointermove",function(e){
+    if(!dragPan||e.pointerId!==dragPan.id){ return; }
+    var dx=e.clientX-dragPan.x, dy=e.clientY-dragPan.y;
+    if(Math.abs(dx)>3||Math.abs(dy)>3){ dragPan.moved=true; }
+    stage.scrollLeft=dragPan.l-dx; stage.scrollTop=dragPan.t-dy;
+    e.preventDefault();
+  });
+  function endPan(e){
+    if(!dragPan){ return; }
+    if(dragPan.moved){ e.stopPropagation(); }
+    try{ stage.releasePointerCapture(dragPan.id); }catch(_){}
+    dragPan=null; syncZoomCursor();
+  }
+  stage.addEventListener("pointerup",endPan);
+  stage.addEventListener("pointercancel",endPan);
+  stage.addEventListener("click",function(e){ if(dragPan&&dragPan.moved){ e.stopPropagation(); e.preventDefault(); } },true);
   stage.addEventListener("wheel",function(e){
     if(mode!=="pages"||onCard){ return; }
     e.preventDefault();

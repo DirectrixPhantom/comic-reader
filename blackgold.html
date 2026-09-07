@@ -698,6 +698,31 @@ window.CONFIG = { title:"Black + Gold", artist:"Snadiya", artistSite:"https://li
   }
   vp.addEventListener("wheel",wheelZoom,{passive:false});
   stage.addEventListener("scroll",function(){ syncEdges(); },{passive:true});
+  var dragPan=null;
+  stage.addEventListener("pointerdown",function(e){
+    if(stageZoom<=1.01||onCard||mode!=="pages"){ return; }
+    if(stage.scrollWidth<=stage.clientWidth+2&&stage.scrollHeight<=stage.clientHeight+2){ return; }
+    dragPan={x:e.clientX,y:e.clientY,l:stage.scrollLeft,t:stage.scrollTop,id:e.pointerId,moved:false};
+    try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+    var im=stage.querySelector("img"); if(im){ im.style.cursor="grabbing"; }
+    e.preventDefault();
+  });
+  stage.addEventListener("pointermove",function(e){
+    if(!dragPan||e.pointerId!==dragPan.id){ return; }
+    var dx=e.clientX-dragPan.x, dy=e.clientY-dragPan.y;
+    if(Math.abs(dx)>3||Math.abs(dy)>3){ dragPan.moved=true; }
+    stage.scrollLeft=dragPan.l-dx; stage.scrollTop=dragPan.t-dy;
+    e.preventDefault();
+  });
+  function endPan(e){
+    if(!dragPan){ return; }
+    if(dragPan.moved){ e.stopPropagation(); }
+    try{ stage.releasePointerCapture(dragPan.id); }catch(_){}
+    dragPan=null; syncZoomCursor();
+  }
+  stage.addEventListener("pointerup",endPan);
+  stage.addEventListener("pointercancel",endPan);
+  stage.addEventListener("click",function(e){ if(dragPan&&dragPan.moved){ e.stopPropagation(); e.preventDefault(); } },true);
   stage.addEventListener("wheel",function(e){
     if(mode!=="pages"||onCard){ return; }
     e.preventDefault();
